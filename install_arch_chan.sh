@@ -13,6 +13,20 @@ log_success() { echo -e "${GREEN} $1${NC}"; }
 log_warning() { echo -e "${YELLOW} $1${NC}"; }
 log_error() { echo -e "${RED} $1${NC}"; }
 
+# Funcion para verificar comandos
+command_exists() {
+  command -v "$1" >/dev/null 2>&1
+}
+
+install_packages() {
+  log_info "Instalando paquetes: $*"
+  if ! sudo pacman -S --needed --no-confirm "$0"; then
+    log_error "Error instalando paquetes: $*"
+    return 1
+  fi
+  return 0
+}
+
 echo -e "${BLUE}🐧 Instalando Arch-Chan AI Assistant para Arch Linux...${NC}"
 
 # Verificar que estamos en Arch Linux
@@ -29,20 +43,25 @@ fi
 
 # Instalar dependencias
 log_info "📦 Instalando dependencias del sistema..."
-sudo pacman -S --needed --noconfirm \
-    python-pip \
-    python-pyside6 \
-    whisper-cli \
-    piper-tts \
-    sox \
-    ollama \
-    ddgr \
-    kdialog \
-    noto-fonts \
-    ttf-hack \
-    jq \
-    curl \
-    wget
+install_packages \
+  python-pip \
+  python-pyside6 \
+  whisper-cli \
+  piper-tts \
+  sox \
+  ollama \
+  ddgr \
+  kdialog \
+  noto-fonts \
+  ttf-hack \
+  jq \
+  curl \
+  wget \
+  git \
+  base-devel || {
+  log_error "Error instalando dependencias del sistema"
+  exit 1
+}
 
 # Instalar dependencias de Python
 log_info "🐍 Instalando dependencias de Python..."
@@ -76,7 +95,7 @@ log_info "🎙️ Verificando modelos de voz..."
 if [ ! -f ~/arch-chan-project/models/es_AR-daniela-high.onnx ]; then
   log_info "📥 Intentando descargar modelo de voz en español..."
   # Intentar descargar automáticamente
-  if command -v wget >/dev/null; then
+  if command_exists wget; then
     if wget -O ~/arch-chan-project/models/es_AR-daniela-high.onnx \
       "https://github.com/rhasspy/piper/releases/download/2023.10.11-2/es_AR-daniela-high.onnx"; then
       log_success "Modelo descargado correctamente"
@@ -100,7 +119,7 @@ fi
 
 # Crear los modelos de Ollama
 log_info "🧠 Creando modelos de IA..."
-if command -v ollama &>/dev/null; then
+if command_exists ollama; then
   # Crear Arch-Chan si no existe
   if ! ollama list | grep -q "arch-chan"; then
     log_info "📦 Creando modelo Arch-Chan..."
@@ -222,8 +241,8 @@ Piensa: ¿realmente necesito ejecutar algo o buscar? Si no, responde normal.
 PARAMETER num_ctx 2048
 PARAMETER temperature 0.6
 EOF
-        ollama create arch-chan-lite -f Arch-Chan-Lite.Modelfile
-    fi
+    ollama create arch-chan-lite -f Arch-Chan-Lite.Modelfile
+  fi
 fi
 
 # Crear archivo desktop
