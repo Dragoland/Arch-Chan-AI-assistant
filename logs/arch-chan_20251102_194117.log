@@ -1,0 +1,37 @@
+2025-11-02 19:41:17,627 - ArchChan - INFO - Directorios de la aplicación verificados/creados
+2025-11-02 19:41:17,627 - ArchChan - INFO - Verificando dependencias...
+2025-11-02 19:41:17,631 - ArchChan - INFO - 'whisper-cli' encontrado via 'which': /usr/bin/whisper-cli
+2025-11-02 19:41:17,753 - ArchChan - INFO - 'piper-tts' encontrado via 'which': /usr/bin/piper-tts
+2025-11-02 19:41:17,766 - ArchChan - INFO - 'aplay' encontrado via 'which': /usr/bin/aplay
+2025-11-02 19:41:17,768 - ArchChan - INFO - 'rec' encontrado via 'which': /usr/bin/rec
+2025-11-02 19:41:17,780 - ArchChan - INFO - 'ddgr' encontrado via 'which': /usr/bin/ddgr
+2025-11-02 19:41:17,783 - ArchChan - INFO - 'kdialog' encontrado via 'which': /usr/bin/kdialog
+2025-11-02 19:41:17,981 - ArchChan - WARNING - kdesu no funciona como comando directo: [Errno 2] No such file or directory: 'kdesu'
+2025-11-02 19:41:17,983 - ArchChan - INFO - Búsqueda profunda para 'kdesu' con 'whereis'...
+2025-11-02 19:41:17,993 - ArchChan - WARNING - kdesu no encontrado con find_dependency
+2025-11-02 19:41:17,996 - ArchChan - INFO - Alternativa a kdesu encontrada: pkexec en /usr/bin/pkexec
+2025-11-02 19:41:17,996 - ArchChan - INFO - Todas las dependencias verificadas correctamente
+2025-11-02 19:41:18,021 - ArchChan - INFO - Modelos cargados: ['arch-chan', 'arch-chan-lite', 'llama3.2:3b', 'gemma:2b']
+2025-11-02 19:41:18,064 - ArchChan - INFO - Aplicación Arch-Chan con interfaz nativa de Arch Linux inicializada
+2025-11-02 19:41:18,101 - ArchChan - INFO - Aplicación Arch-Chan con interfaz nativa iniciada correctamente
+2025-11-02 19:41:48,596 - ArchChan - INFO - Cambio de estado: idle -> processing
+2025-11-02 19:41:48,623 - ArchChan - INFO - Configuración guardada correctamente
+2025-11-02 19:41:48,623 - ArchChan - INFO - WorkerThread inicializado con modelo: arch-chan
+2025-11-02 19:41:48,625 - ArchChan - INFO - Procesando prompt de texto: hola...
+2025-11-02 19:41:48,628 - ArchChan - INFO - Intención detectada: CONVERSACIÓN NORMAL
+2025-11-02 19:41:48,628 - ArchChan - INFO - Intención detectada: conversation
+2025-11-02 19:41:48,629 - ArchChan - INFO - Llamando a Ollama con 3 mensajes
+2025-11-02 19:42:57,558 - ArchChan - INFO - Respuesta cruda recibida: {}...
+2025-11-02 19:42:57,560 - ArchChan - INFO - JSON parseado correctamente: []
+2025-11-02 19:42:57,560 - ArchChan - WARNING - Tipo de herramienta no permitida: ''
+2025-11-02 19:42:57,560 - ArchChan - INFO - Usando fallback a respuesta normal
+2025-11-02 19:42:57,560 - ArchChan - INFO - Reproduciendo texto: {}...
+2025-11-02 19:43:59,335 - ArchChan - INFO - Chat limpiado por el usuario
+2025-11-02 19:44:16,690 - ArchChan - INFO - Deteniendo todos los procesos...
+2025-11-02 19:44:18,696 - ArchChan - INFO - Respuesta sudo: denegado
+2025-11-02 19:44:18,696 - ArchChan - INFO - Worker thread detenido por el usuario
+2025-11-02 19:44:18,700 - ArchChan - INFO - Cambio de estado: processing -> idle
+2025-11-02 19:44:18,706 - ArchChan - INFO - 'kdialog' encontrado via 'which': /usr/bin/kdialog
+2025-11-02 19:44:18,707 - ArchChan - INFO - Flujo de trabajo completado
+2025-11-02 19:44:34,865 - ArchChan - INFO - Cerrando aplicación Arch-Chan...
+2025-11-02 19:44:34,866 - ArchChan - INFO - Configuración guardada correctamente

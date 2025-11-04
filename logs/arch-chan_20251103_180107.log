@@ -1,0 +1,90 @@
+2025-11-03 18:01:07,217 - ArchChan - INFO - Directorios de la aplicación verificados/creados
+2025-11-03 18:01:07,217 - ArchChan - INFO - Verificando dependencias...
+2025-11-03 18:01:07,219 - ArchChan - INFO - 'whisper-cli' encontrado via 'which': /usr/bin/whisper-cli
+2025-11-03 18:01:07,295 - ArchChan - INFO - 'piper-tts' encontrado via 'which': /usr/bin/piper-tts
+2025-11-03 18:01:07,302 - ArchChan - INFO - 'aplay' encontrado via 'which': /usr/bin/aplay
+2025-11-03 18:01:07,303 - ArchChan - INFO - 'rec' encontrado via 'which': /usr/bin/rec
+2025-11-03 18:01:07,308 - ArchChan - INFO - 'ddgr' encontrado via 'which': /usr/bin/ddgr
+2025-11-03 18:01:07,309 - ArchChan - INFO - 'kdialog' encontrado via 'which': /usr/bin/kdialog
+2025-11-03 18:01:07,395 - ArchChan - WARNING - kdesu no funciona como comando directo: [Errno 2] No such file or directory: 'kdesu'
+2025-11-03 18:01:07,396 - ArchChan - INFO - Búsqueda profunda para 'kdesu' con 'whereis'...
+2025-11-03 18:01:07,401 - ArchChan - WARNING - kdesu no encontrado con find_dependency
+2025-11-03 18:01:07,402 - ArchChan - INFO - Alternativa a kdesu encontrada: pkexec en /usr/bin/pkexec
+2025-11-03 18:01:07,402 - ArchChan - INFO - Todas las dependencias verificadas correctamente
+2025-11-03 18:01:07,409 - ArchChan - INFO - Backup de configuración creado: /home/dragoland-333/arch-chan-project/configs/backups/config_backup_20251103_180107.ini
+2025-11-03 18:01:07,409 - ArchChan - INFO - Configuración guardada correctamente
+2025-11-03 18:01:07,414 - ArchChan - ERROR - Error cargando modelos: 'ArchChanApp' object has no attribute 'model_status'
+2025-11-03 18:01:07,435 - ArchChan - INFO - Mensaje de bienvenida mostrado
+2025-11-03 18:01:07,477 - ArchChan - INFO - Aplicación Arch-Chan v2.1 con interfaz mejorada inicializada
+2025-11-03 18:01:07,529 - ArchChan - INFO - Aplicación Arch-Chan v2.1 con interfaz mejorada iniciada correctamente
+2025-11-03 18:01:42,344 - ArchChan - INFO - Cambio de estado: idle -> processing
+2025-11-03 18:01:42,351 - ArchChan - INFO - Backup de configuración creado: /home/dragoland-333/arch-chan-project/configs/backups/config_backup_20251103_180142.ini
+2025-11-03 18:01:42,351 - ArchChan - INFO - Configuración guardada correctamente
+2025-11-03 18:01:42,351 - ArchChan - INFO - WorkerThread v2.1 inicializado con modelo: arch-chan
+2025-11-03 18:01:42,352 - ArchChan - INFO - Procesando prompt de texto: Hola, presentate!...
+2025-11-03 18:01:42,354 - ArchChan - ERROR - Error inesperado: missing ), unterminated subpattern at position 6
+Traceback (most recent call last):
+  File "/home/dragoland-333/arch-chan-project/worker.py", line 801, in run
+    intent = self.analyze_intent(user_prompt)
+  File "/home/dragoland-333/arch-chan-project/worker.py", line 145, in analyze_intent
+    if re.search(pattern, input_lower):
+       ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/re/__init__.py", line 177, in search
+    return _compile(pattern, flags).search(string)
+           ~~~~~~~~^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/re/__init__.py", line 350, in _compile
+    p = _compiler.compile(pattern, flags)
+  File "/usr/lib/python3.13/re/_compiler.py", line 748, in compile
+    p = _parser.parse(p, flags)
+  File "/usr/lib/python3.13/re/_parser.py", line 980, in parse
+    p = _parse_sub(source, state, flags & SRE_FLAG_VERBOSE, 0)
+  File "/usr/lib/python3.13/re/_parser.py", line 459, in _parse_sub
+    itemsappend(_parse(source, state, verbose, nested + 1,
+                ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                       not nested and not items))
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/re/_parser.py", line 865, in _parse
+    raise source.error("missing ), unterminated subpattern",
+                       source.tell() - start)
+re.PatternError: missing ), unterminated subpattern at position 6
+2025-11-03 18:01:42,363 - ArchChan - ERROR - Error en worker thread: Error inesperado: missing ), unterminated subpattern at position 6
+2025-11-03 18:01:42,363 - ArchChan - INFO - Cambio de estado: processing -> idle
+2025-11-03 18:01:42,590 - ArchChan - INFO - 'kdialog' encontrado via 'which': /usr/bin/kdialog
+2025-11-03 18:01:42,590 - ArchChan - INFO - Flujo de trabajo completado
+2025-11-03 18:01:56,132 - ArchChan - INFO - Cambio de estado: idle -> processing
+2025-11-03 18:01:56,135 - ArchChan - INFO - Backup de configuración creado: /home/dragoland-333/arch-chan-project/configs/backups/config_backup_20251103_180156.ini
+2025-11-03 18:01:56,135 - ArchChan - INFO - Configuración guardada correctamente
+2025-11-03 18:01:56,135 - ArchChan - INFO - WorkerThread v2.1 inicializado con modelo: arch-chan
+2025-11-03 18:01:56,136 - ArchChan - INFO - Procesando prompt de texto: Hola, presentate...
+2025-11-03 18:01:56,136 - ArchChan - ERROR - Error inesperado: missing ), unterminated subpattern at position 6
+Traceback (most recent call last):
+  File "/home/dragoland-333/arch-chan-project/worker.py", line 801, in run
+    intent = self.analyze_intent(user_prompt)
+  File "/home/dragoland-333/arch-chan-project/worker.py", line 145, in analyze_intent
+    if re.search(pattern, input_lower):
+       ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/re/__init__.py", line 177, in search
+    return _compile(pattern, flags).search(string)
+           ~~~~~~~~^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/re/__init__.py", line 350, in _compile
+    p = _compiler.compile(pattern, flags)
+  File "/usr/lib/python3.13/re/_compiler.py", line 748, in compile
+    p = _parser.parse(p, flags)
+  File "/usr/lib/python3.13/re/_parser.py", line 980, in parse
+    p = _parse_sub(source, state, flags & SRE_FLAG_VERBOSE, 0)
+  File "/usr/lib/python3.13/re/_parser.py", line 459, in _parse_sub
+    itemsappend(_parse(source, state, verbose, nested + 1,
+                ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                       not nested and not items))
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/re/_parser.py", line 865, in _parse
+    raise source.error("missing ), unterminated subpattern",
+                       source.tell() - start)
+re.PatternError: missing ), unterminated subpattern at position 6
+2025-11-03 18:01:56,142 - ArchChan - ERROR - Error en worker thread: Error inesperado: missing ), unterminated subpattern at position 6
+2025-11-03 18:01:56,142 - ArchChan - INFO - Cambio de estado: processing -> idle
+2025-11-03 18:01:56,375 - ArchChan - INFO - 'kdialog' encontrado via 'which': /usr/bin/kdialog
+2025-11-03 18:01:56,375 - ArchChan - INFO - Flujo de trabajo completado
+2025-11-03 18:02:00,590 - ArchChan - INFO - Cerrando aplicación Arch-Chan v2.1...
+2025-11-03 18:02:01,759 - ArchChan - INFO - Backup de configuración creado: /home/dragoland-333/arch-chan-project/configs/backups/config_backup_20251103_180201.ini
+2025-11-03 18:02:01,761 - ArchChan - INFO - Configuración guardada correctamente

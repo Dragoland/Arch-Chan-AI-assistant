@@ -1,0 +1,95 @@
+2025-11-03 18:03:05,117 - ArchChan - INFO - Directorios de la aplicación verificados/creados
+2025-11-03 18:03:05,117 - ArchChan - INFO - Verificando dependencias...
+2025-11-03 18:03:05,119 - ArchChan - INFO - 'whisper-cli' encontrado via 'which': /usr/bin/whisper-cli
+2025-11-03 18:03:05,182 - ArchChan - INFO - 'piper-tts' encontrado via 'which': /usr/bin/piper-tts
+2025-11-03 18:03:05,190 - ArchChan - INFO - 'aplay' encontrado via 'which': /usr/bin/aplay
+2025-11-03 18:03:05,191 - ArchChan - INFO - 'rec' encontrado via 'which': /usr/bin/rec
+2025-11-03 18:03:05,196 - ArchChan - INFO - 'ddgr' encontrado via 'which': /usr/bin/ddgr
+2025-11-03 18:03:05,197 - ArchChan - INFO - 'kdialog' encontrado via 'which': /usr/bin/kdialog
+2025-11-03 18:03:05,286 - ArchChan - WARNING - kdesu no funciona como comando directo: [Errno 2] No such file or directory: 'kdesu'
+2025-11-03 18:03:05,287 - ArchChan - INFO - Búsqueda profunda para 'kdesu' con 'whereis'...
+2025-11-03 18:03:05,291 - ArchChan - WARNING - kdesu no encontrado con find_dependency
+2025-11-03 18:03:05,292 - ArchChan - INFO - Alternativa a kdesu encontrada: pkexec en /usr/bin/pkexec
+2025-11-03 18:03:05,292 - ArchChan - INFO - Todas las dependencias verificadas correctamente
+2025-11-03 18:03:05,298 - ArchChan - INFO - Backup de configuración creado: /home/dragoland-333/arch-chan-project/configs/backups/config_backup_20251103_180305.ini
+2025-11-03 18:03:05,298 - ArchChan - INFO - Configuración guardada correctamente
+2025-11-03 18:03:05,303 - ArchChan - ERROR - Error cargando modelos: 'ArchChanApp' object has no attribute 'model_status'
+2025-11-03 18:03:05,325 - ArchChan - INFO - Mensaje de bienvenida mostrado
+2025-11-03 18:03:05,367 - ArchChan - INFO - Aplicación Arch-Chan v2.1 con interfaz mejorada inicializada
+2025-11-03 18:03:05,423 - ArchChan - INFO - Aplicación Arch-Chan v2.1 con interfaz mejorada iniciada correctamente
+2025-11-03 18:04:05,861 - ArchChan - INFO - Cambio de estado: idle -> processing
+2025-11-03 18:04:05,868 - ArchChan - INFO - Backup de configuración creado: /home/dragoland-333/arch-chan-project/configs/backups/config_backup_20251103_180405.ini
+2025-11-03 18:04:05,869 - ArchChan - INFO - Configuración guardada correctamente
+2025-11-03 18:04:05,869 - ArchChan - INFO - WorkerThread v2.1 inicializado con modelo: arch-chan
+2025-11-03 18:04:05,872 - ArchChan - INFO - Procesando prompt de texto: Hola, presentate!...
+2025-11-03 18:04:05,874 - ArchChan - ERROR - Error inesperado: missing ), unterminated subpattern at position 6
+Traceback (most recent call last):
+  File "/home/dragoland-333/arch-chan-project/worker.py", line 801, in run
+    intent = self.analyze_intent(user_prompt)
+  File "/home/dragoland-333/arch-chan-project/worker.py", line 145, in analyze_intent
+    if re.search(pattern, input_lower):
+       ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/re/__init__.py", line 177, in search
+    return _compile(pattern, flags).search(string)
+           ~~~~~~~~^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/re/__init__.py", line 350, in _compile
+    p = _compiler.compile(pattern, flags)
+  File "/usr/lib/python3.13/re/_compiler.py", line 748, in compile
+    p = _parser.parse(p, flags)
+  File "/usr/lib/python3.13/re/_parser.py", line 980, in parse
+    p = _parse_sub(source, state, flags & SRE_FLAG_VERBOSE, 0)
+  File "/usr/lib/python3.13/re/_parser.py", line 459, in _parse_sub
+    itemsappend(_parse(source, state, verbose, nested + 1,
+                ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                       not nested and not items))
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/re/_parser.py", line 865, in _parse
+    raise source.error("missing ), unterminated subpattern",
+                       source.tell() - start)
+re.PatternError: missing ), unterminated subpattern at position 6
+2025-11-03 18:04:05,881 - ArchChan - ERROR - Error en worker thread: Error inesperado: missing ), unterminated subpattern at position 6
+2025-11-03 18:04:05,881 - ArchChan - INFO - Cambio de estado: processing -> idle
+2025-11-03 18:04:05,991 - ArchChan - INFO - 'kdialog' encontrado via 'which': /usr/bin/kdialog
+2025-11-03 18:04:05,991 - ArchChan - INFO - Flujo de trabajo completado
+2025-11-03 18:04:13,338 - ArchChan - INFO - Cambio de estado: idle -> listening
+2025-11-03 18:04:13,341 - ArchChan - INFO - Backup de configuración creado: /home/dragoland-333/arch-chan-project/configs/backups/config_backup_20251103_180413.ini
+2025-11-03 18:04:13,341 - ArchChan - INFO - Configuración guardada correctamente
+2025-11-03 18:04:13,341 - ArchChan - INFO - WorkerThread v2.1 inicializado con modelo: arch-chan
+2025-11-03 18:04:13,342 - ArchChan - INFO - Iniciando grabación de audio...
+2025-11-03 18:04:13,342 - ArchChan - INFO - Iniciando grabación con comando: rec /home/dragoland-333/arch-chan-project/temp/input.wav rate 16k silence 1 0.1 5% 1 1.0 5% norm −3 -b 16 -c 1
+2025-11-03 18:04:13,456 - ArchChan - INFO - Transcribiendo audio con Whisper...
+2025-11-03 18:04:13,457 - ArchChan - INFO - Comando validado: whisper-cli -m /home/dragoland-333/arch-chan-project/models/ggml-base.bin -f /home/dragoland-333/arch-chan-project/temp/input.wav -l es -otxt -od /home/dragoland-333/arch-chan-project/temp --timeout 30000 --threads 12
+2025-11-03 18:04:13,457 - ArchChan - INFO - Ejecutando comando: whisper-cli -m /home/dragoland-333/arch-chan-project/models/ggml-base.bin -f /home/dragoland-333/arch-chan-project/temp/input.wav -l es -otxt -od /home/dragoland-333/arch-chan-project/temp --timeout 30000 --threads 12
+2025-11-03 18:04:13,515 - ArchChan - INFO - Comando ejecutado - Código: 0, Salida: 0 chars, Errores: 5438 chars
+2025-11-03 18:04:13,516 - ArchChan - ERROR - Error en transcripción: No se pudo encontrar el archivo de transcripción: /home/dragoland-333/arch-chan-project/temp/input.wav.txt
+2025-11-03 18:04:13,516 - ArchChan - INFO - Cambio de estado: listening -> idle
+2025-11-03 18:04:13,601 - ArchChan - INFO - Flujo de trabajo completado
+2025-11-03 18:04:14,914 - ArchChan - INFO - Cambio de estado: idle -> listening
+2025-11-03 18:04:14,917 - ArchChan - INFO - Backup de configuración creado: /home/dragoland-333/arch-chan-project/configs/backups/config_backup_20251103_180414.ini
+2025-11-03 18:04:14,917 - ArchChan - INFO - Configuración guardada correctamente
+2025-11-03 18:04:14,917 - ArchChan - INFO - WorkerThread v2.1 inicializado con modelo: arch-chan
+2025-11-03 18:04:14,919 - ArchChan - INFO - Iniciando grabación de audio...
+2025-11-03 18:04:14,919 - ArchChan - INFO - Iniciando grabación con comando: rec /home/dragoland-333/arch-chan-project/temp/input.wav rate 16k silence 1 0.1 5% 1 1.0 5% norm −3 -b 16 -c 1
+2025-11-03 18:04:14,984 - ArchChan - INFO - Transcribiendo audio con Whisper...
+2025-11-03 18:04:14,985 - ArchChan - INFO - Comando validado: whisper-cli -m /home/dragoland-333/arch-chan-project/models/ggml-base.bin -f /home/dragoland-333/arch-chan-project/temp/input.wav -l es -otxt -od /home/dragoland-333/arch-chan-project/temp --timeout 30000 --threads 12
+2025-11-03 18:04:14,985 - ArchChan - INFO - Ejecutando comando: whisper-cli -m /home/dragoland-333/arch-chan-project/models/ggml-base.bin -f /home/dragoland-333/arch-chan-project/temp/input.wav -l es -otxt -od /home/dragoland-333/arch-chan-project/temp --timeout 30000 --threads 12
+2025-11-03 18:04:15,045 - ArchChan - INFO - Comando ejecutado - Código: 0, Salida: 0 chars, Errores: 5438 chars
+2025-11-03 18:04:15,045 - ArchChan - ERROR - Error en transcripción: No se pudo encontrar el archivo de transcripción: /home/dragoland-333/arch-chan-project/temp/input.wav.txt
+2025-11-03 18:04:15,046 - ArchChan - INFO - Cambio de estado: listening -> idle
+2025-11-03 18:04:15,137 - ArchChan - INFO - Flujo de trabajo completado
+2025-11-03 18:04:17,312 - ArchChan - INFO - Cambio de estado: idle -> listening
+2025-11-03 18:04:17,315 - ArchChan - INFO - Backup de configuración creado: /home/dragoland-333/arch-chan-project/configs/backups/config_backup_20251103_180417.ini
+2025-11-03 18:04:17,315 - ArchChan - INFO - Configuración guardada correctamente
+2025-11-03 18:04:17,315 - ArchChan - INFO - WorkerThread v2.1 inicializado con modelo: arch-chan
+2025-11-03 18:04:17,316 - ArchChan - INFO - Iniciando grabación de audio...
+2025-11-03 18:04:17,316 - ArchChan - INFO - Iniciando grabación con comando: rec /home/dragoland-333/arch-chan-project/temp/input.wav rate 16k silence 1 0.1 5% 1 1.0 5% norm −3 -b 16 -c 1
+2025-11-03 18:04:17,380 - ArchChan - INFO - Transcribiendo audio con Whisper...
+2025-11-03 18:04:17,381 - ArchChan - INFO - Comando validado: whisper-cli -m /home/dragoland-333/arch-chan-project/models/ggml-base.bin -f /home/dragoland-333/arch-chan-project/temp/input.wav -l es -otxt -od /home/dragoland-333/arch-chan-project/temp --timeout 30000 --threads 12
+2025-11-03 18:04:17,381 - ArchChan - INFO - Ejecutando comando: whisper-cli -m /home/dragoland-333/arch-chan-project/models/ggml-base.bin -f /home/dragoland-333/arch-chan-project/temp/input.wav -l es -otxt -od /home/dragoland-333/arch-chan-project/temp --timeout 30000 --threads 12
+2025-11-03 18:04:17,450 - ArchChan - INFO - Comando ejecutado - Código: 0, Salida: 0 chars, Errores: 5438 chars
+2025-11-03 18:04:17,450 - ArchChan - ERROR - Error en transcripción: No se pudo encontrar el archivo de transcripción: /home/dragoland-333/arch-chan-project/temp/input.wav.txt
+2025-11-03 18:04:17,451 - ArchChan - INFO - Cambio de estado: listening -> idle
+2025-11-03 18:04:17,534 - ArchChan - INFO - Flujo de trabajo completado
+2025-11-03 18:04:42,194 - ArchChan - INFO - Cerrando aplicación Arch-Chan v2.1...
+2025-11-03 18:04:42,231 - ArchChan - INFO - Backup de configuración creado: /home/dragoland-333/arch-chan-project/configs/backups/config_backup_20251103_180442.ini
+2025-11-03 18:04:42,231 - ArchChan - INFO - Configuración guardada correctamente

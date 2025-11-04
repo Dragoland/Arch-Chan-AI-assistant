@@ -1,0 +1,21 @@
+2025-11-03 16:27:56,626 - ArchChan - INFO - Directorios de la aplicación verificados/creados
+2025-11-03 16:27:56,627 - ArchChan - INFO - Verificando dependencias...
+2025-11-03 16:27:56,630 - ArchChan - INFO - 'whisper-cli' encontrado via 'which': /usr/bin/whisper-cli
+2025-11-03 16:27:57,187 - ArchChan - INFO - 'piper-tts' encontrado via 'which': /usr/bin/piper-tts
+2025-11-03 16:27:57,222 - ArchChan - INFO - 'aplay' encontrado via 'which': /usr/bin/aplay
+2025-11-03 16:27:57,223 - ArchChan - INFO - 'rec' encontrado via 'which': /usr/bin/rec
+2025-11-03 16:27:57,233 - ArchChan - INFO - 'ddgr' encontrado via 'which': /usr/bin/ddgr
+2025-11-03 16:27:57,234 - ArchChan - INFO - 'kdialog' encontrado via 'which': /usr/bin/kdialog
+2025-11-03 16:27:57,347 - ArchChan - WARNING - kdesu no funciona como comando directo: [Errno 2] No such file or directory: 'kdesu'
+2025-11-03 16:27:57,348 - ArchChan - INFO - Búsqueda profunda para 'kdesu' con 'whereis'...
+2025-11-03 16:27:57,363 - ArchChan - WARNING - kdesu no encontrado con find_dependency
+2025-11-03 16:27:57,364 - ArchChan - INFO - Alternativa a kdesu encontrada: pkexec en /usr/bin/pkexec
+2025-11-03 16:27:57,364 - ArchChan - INFO - Todas las dependencias verificadas correctamente
+2025-11-03 16:27:57,375 - ArchChan - INFO - Backup de configuración creado: /home/dragoland-333/arch-chan-project/configs/backups/config_backup_20251103_162757.ini
+2025-11-03 16:27:57,376 - ArchChan - INFO - Configuración guardada correctamente
+2025-11-03 16:27:57,387 - ArchChan - INFO - Modelos cargados: ['arch-chan', 'arch-chan-lite', 'llama3.2:3b', 'gemma:2b']
+2025-11-03 16:27:57,415 - ArchChan - INFO - Aplicación Arch-Chan con interfaz nativa de Arch Linux inicializada
+2025-11-03 16:27:57,439 - ArchChan - INFO - Aplicación Arch-Chan con interfaz nativa iniciada correctamente
+2025-11-03 16:28:01,381 - ArchChan - INFO - Cerrando aplicación Arch-Chan...
+2025-11-03 16:28:01,381 - ArchChan - INFO - Backup de configuración creado: /home/dragoland-333/arch-chan-project/configs/backups/config_backup_20251103_162801.ini
+2025-11-03 16:28:01,381 - ArchChan - INFO - Configuración guardada correctamente

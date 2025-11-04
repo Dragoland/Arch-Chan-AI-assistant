@@ -1,0 +1,18 @@
+2025-11-03 11:12:15,831 - ArchChan - INFO - Directorios de la aplicación verificados/creados
+2025-11-03 11:12:15,831 - ArchChan - INFO - Verificando dependencias...
+2025-11-03 11:12:15,838 - ArchChan - INFO - 'whisper-cli' encontrado via 'which': /usr/bin/whisper-cli
+2025-11-03 11:12:16,541 - ArchChan - INFO - 'piper-tts' encontrado via 'which': /usr/bin/piper-tts
+2025-11-03 11:12:16,586 - ArchChan - INFO - 'aplay' encontrado via 'which': /usr/bin/aplay
+2025-11-03 11:12:16,589 - ArchChan - INFO - 'rec' encontrado via 'which': /usr/bin/rec
+2025-11-03 11:12:16,606 - ArchChan - INFO - 'ddgr' encontrado via 'which': /usr/bin/ddgr
+2025-11-03 11:12:16,609 - ArchChan - INFO - 'kdialog' encontrado via 'which': /usr/bin/kdialog
+2025-11-03 11:12:16,798 - ArchChan - WARNING - kdesu no funciona como comando directo: [Errno 2] No such file or directory: 'kdesu'
+2025-11-03 11:12:16,800 - ArchChan - INFO - Búsqueda profunda para 'kdesu' con 'whereis'...
+2025-11-03 11:12:16,810 - ArchChan - WARNING - kdesu no encontrado con find_dependency
+2025-11-03 11:12:16,812 - ArchChan - INFO - Alternativa a kdesu encontrada: pkexec en /usr/bin/pkexec
+2025-11-03 11:12:16,812 - ArchChan - INFO - Todas las dependencias verificadas correctamente
+2025-11-03 11:12:16,848 - ArchChan - INFO - Modelos cargados: ['arch-chan', 'arch-chan-lite', 'llama3.2:3b', 'gemma:2b']
+2025-11-03 11:12:16,898 - ArchChan - INFO - Aplicación Arch-Chan con interfaz nativa de Arch Linux inicializada
+2025-11-03 11:12:16,958 - ArchChan - INFO - Aplicación Arch-Chan con interfaz nativa iniciada correctamente
+2025-11-03 11:13:16,449 - ArchChan - INFO - Cerrando aplicación Arch-Chan...
+2025-11-03 11:13:16,450 - ArchChan - INFO - Configuración guardada correctamente
