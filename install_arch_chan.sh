@@ -46,7 +46,10 @@ sudo pacman -S --needed --noconfirm \
 
 # Instalar dependencias de Python
 log_info "🐍 Instalando dependencias de Python..."
-pip install requests psutil
+if ! pip install requests psutil; then
+  log_error "Error instalando dependencias de Python"
+  exit 1
+fi
 
 # Configurar Ollama si no está ejecutándose
 log_info "🔧 Configurando Ollama..."
