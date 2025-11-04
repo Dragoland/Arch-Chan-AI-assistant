@@ -8,7 +8,7 @@ BLUE='\033[0;34m'
 NC='\033[0m' # Sin color
 
 # Funciones de logging
-log_info() { echo -e "$BLUE  $1${NC}"; }
+log_info() { echo -e "${BLUE} $1${NC}"; }
 log_success() { echo -e "${GREEN} $1${NC}"; }
 log_warning() { echo -e "${YELLOW} $1${NC}"; }
 log_error() { echo -e "${RED} $1${NC}"; }
@@ -53,7 +53,7 @@ log_info "🔧 Configurando Ollama..."
 if ! systemctl is-active --quiet ollama; then
   log_info "➡️ Iniciando servicio Ollama..."
   sudo systemctl enable ollama || log_warning "No se pudo habilitar ollama"
-  sudo systemctl start ollama || log_warning "No se pudo inicar ollama"
+  sudo systemctl start ollama || log_warning "No se pudo iniciar ollama"
   sleep 2
 fi
 
@@ -74,10 +74,13 @@ if [ ! -f ~/arch-chan-project/models/es_AR-daniela-high.onnx ]; then
   log_info "📥 Intentando descargar modelo de voz en español..."
   # Intentar descargar automáticamente
   if command -v wget >/dev/null; then
-    wget -O ~/arch-chan-project/models/es_AR-daniela-high.onnx \
-      "https://github.com/rhasspy/piper/releases/download/2023.10.11-2/es_AR-daniela-high.onnx" ||
-      log_warning "⚠️  No se pudo descargar automáticamente. Descarga manualmente de:"
-    log_warning "    https://github.com/rhasspy/piper/releases"
+    if wget -O ~/arch-chan-project/models/es_AR-daniela-high.onnx \
+      "https://github.com/rhasspy/piper/releases/download/2023.10.11-2/es_AR-daniela-high.onnx"; then
+      log_success "Modelo descargado correctamente"
+    else
+      log_warning "No se pudo descargar automáticamente. Descarga manualmente de:"
+      log_warning "    https://github.com/rhasspy/piper/releases"
+    fi
   else
     log_warning "⚠️  Instala wget para descarga automática o descarga manualmente:"
     log_warning "    https://github.com/rhasspy/piper/releases"
@@ -93,7 +96,7 @@ if [ ! -f ~/arch-chan-project/models/ggml-base.bin ]; then
 fi
 
 # Crear los modelos de Ollama
-echo "🧠 Creando modelos de IA..."
+log_info "🧠 Creando modelos de IA..."
 if command -v ollama &>/dev/null; then
   # Crear Arch-Chan si no existe
   if ! ollama list | grep -q "arch-chan"; then
@@ -265,4 +268,3 @@ echo "   3. Ejecuta la aplicación: python main.py"
 echo "   4. Opcional: Busca 'Arch-Chan' en tu menú de aplicaciones"
 echo ""
 echo -e "${GREEN}🐧 ¡Disfruta de tu asistente de IA nativo de Arch Linux!${NC}"
-
