@@ -289,8 +289,18 @@ chmod +x main.py 2>/dev/null || true
 chmod 755 ~/arch-chan-project
 chmod 644 ~/arch-chan-project/models/* 2>/dev/null || true
 
+# Verificacion final
+log_info "Realizando verificaciones finales..."
+checks_passed=0
+checks_total=4
+
+[ -d "$APP_DIR" ] && ((checks_passed++))
+[ -f "$DESKTOP_DIR/arch-chan.desktop" ] && ((checks_passed++))
+command_exists ollama && ((checks_passed++))
+systemctl is-active --quiet ollama && ((checks_passed++))
+
 echo ""
-log_success "🎉 ¡Instalación completada!"
+log_success "🎉 ¡Instalación completada! ($checks_passed/$checks_total verificaciones OK)"
 echo ""
 echo -e "${BLUE}📋 Próximos pasos:${NC}"
 echo "   1. Asegúrate de que Ollama esté ejecutándose: systemctl --user status ollama"
