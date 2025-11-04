@@ -20,14 +20,21 @@ command_exists() {
 
 install_packages() {
   log_info "Instalando paquetes: $*"
-  if ! sudo pacman -S --needed --no-confirm "$0"; then
+  if ! sudo pacman -S --needed --noconfirm "$@"; then
     log_error "Error instalando paquetes: $*"
     return 1
   fi
   return 0
 }
 
-echo -e "${BLUE}🐧 Instalando Arch-Chan AI Assistant para Arch Linux...${NC}"
+# Configuracion
+APP_NAME="Arch-Chan"
+APP_DIR="$HOME/arch-chan-project"
+MODEL_DIR="$APP_DIR/models"
+CONFIG_DIR="$APP_DIR/configs"
+LOG_DIR="$APP_DIR/logs"
+
+echo -e "${BLUE}🐧 Instalando $APP_NAME AI Assistant para Arch Linux...${NC}"
 
 # Verificar que estamos en Arch Linux
 if ! grep -q "Arch Linux" /etc/os-release 2>/dev/null; then
@@ -88,15 +95,15 @@ fi
 
 # Crear directorios de la aplicación
 log_info "📁 Creando estructura de directorios..."
-mkdir -p ~/arch-chan-project/{models,temp,logs,configs,backups}
+mkdir -p "$MODEL_DIR" "$CONFIG_DIR" "$LOG_DIR" "$APP_DIR/temp" "$APP_DIR/backups"
 
 # Descargar modelos de voz si no existen
 log_info "🎙️ Verificando modelos de voz..."
-if [ ! -f ~/arch-chan-project/models/es_AR-daniela-high.onnx ]; then
+if [ ! -f "$MODEL_DIR/es_AR-daniela-high.onnx" ]; then
   log_info "📥 Intentando descargar modelo de voz en español..."
   # Intentar descargar automáticamente
   if command_exists wget; then
-    if wget -O ~/arch-chan-project/models/es_AR-daniela-high.onnx \
+    if wget -O "$MODEL_DIR/es_AR-daniela-high.onnx" \
       "https://github.com/rhasspy/piper/releases/download/2023.10.11-2/es_AR-daniela-high.onnx"; then
       log_success "Modelo descargado correctamente"
     else
@@ -109,12 +116,12 @@ if [ ! -f ~/arch-chan-project/models/es_AR-daniela-high.onnx ]; then
   fi
 fi
 
-if [ ! -f ~/arch-chan-project/models/ggml-base.bin ]; then
+if [ ! -f "$MODEL_DIR/ggml-base.bin" ]; then
   log_warning "Modelo Whisper no encontrado"
   # El usuario deberá descargar manualmente el modelo de Whisper
   log_info "⚠️  Para Whisper, descarga el modelo base de:"
   log_info "    https://github.com/ggerganov/whisper.cpp"
-  log_info "    y colócalo en ~/arch-chan-project/models/ggml-base.bin"
+  log_info "    y colócalo en: $MODEL_DIR/ggml-base.bin"
 fi
 
 # Crear los modelos de Ollama
@@ -247,7 +254,10 @@ fi
 
 # Crear archivo desktop
 log_info "🖥️ Creando lanzador de aplicación..."
-cat >~/.local/share/applications/arch-chan.desktop <<EOF
+DESKTOP_DIR="$HOME/.local/share/applications"
+mkdir -p "$DESKTOP_DIR"
+
+cat >"$DESKTOP_DIR/arch-chan.desktop" <<EOF
 [Desktop Entry]
 Version=1.0
 Type=Application
@@ -263,20 +273,19 @@ EOF
 
 # Crear script de actualización
 log_info "🔄 Creando script de actualización..."
-cat >update_arch_chan.sh <<'EOF'
+cat >"$APP_DIR/update_arch_chan.sh" <<'EOF'
 #!/bin/bash
 echo "🔄 Actualizando Arch-Chan..."
 cd "$(dirname "$0")"
 git pull origin main
 python main.py --update
 EOF
-chmod +x update_arch_chan.sh
-
-# Hacer ejecutable el script principal
-chmod +x main.py
+chmod +x "$APP_DIR/update_arch_chan.sh"
 
 # Configurar permisos
 log_info "🔒 Configurando permisos..."
+find "$APP_DIR" -type f -name "*.sh" -exec chmod +x {} \;
+chmod +x main.py 2>/dev/null || true
 chmod 755 ~/arch-chan-project
 chmod 644 ~/arch-chan-project/models/* 2>/dev/null || true
 
@@ -285,8 +294,8 @@ log_success "🎉 ¡Instalación completada!"
 echo ""
 echo -e "${BLUE}📋 Próximos pasos:${NC}"
 echo "   1. Asegúrate de que Ollama esté ejecutándose: systemctl --user status ollama"
-echo "   2. Verifica los modelos de voz en ~/arch-chan-project/models/"
+echo "   2. Verifica los modelos de voz en $MODEL_DIR"
 echo "   3. Ejecuta la aplicación: python main.py"
-echo "   4. Opcional: Busca 'Arch-Chan' en tu menú de aplicaciones"
+echo "   4. Opcional: Busca '$APP_NAME' en tu menú de aplicaciones"
 echo ""
 echo -e "${GREEN}🐧 ¡Disfruta de tu asistente de IA nativo de Arch Linux!${NC}"
