@@ -1,91 +1,136 @@
 #!/bin/bash
 
-echo "🐧 Instalando Arch-Chan AI Assistant para Arch Linux..."
+# Colores para output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # Sin color
+
+# Funciones de logging
+log_info() { echo -e "${BLUE} $1${NC}"; }
+log_success() { echo -e "${GREEN} $1${NC}"; }
+log_warning() { echo -e "${YELLOW} $1${NC}"; }
+log_error() { echo -e "${RED} $1${NC}"; }
+
+# Funcion para verificar comandos
+command_exists() {
+  command -v "$1" >/dev/null 2>&1
+}
+
+install_packages() {
+  log_info "Instalando paquetes: $*"
+  if ! sudo pacman -S --needed --noconfirm "$@"; then
+    log_error "Error instalando paquetes: $*"
+    return 1
+  fi
+  return 0
+}
+
+# Configuracion
+APP_NAME="Arch-Chan"
+APP_DIR="$HOME/arch-chan-project"
+MODEL_DIR="$APP_DIR/models"
+CONFIG_DIR="$APP_DIR/configs"
+LOG_DIR="$APP_DIR/logs"
+
+echo -e "${BLUE}🐧 Instalando $APP_NAME AI Assistant para Arch Linux...${NC}"
 
 # Verificar que estamos en Arch Linux
 if ! grep -q "Arch Linux" /etc/os-release 2>/dev/null; then
-    echo "❌ Este script es solo para Arch Linux"
-    exit 1
+  log_error "❌ Este script es solo para Arch Linux"
+  exit 1
 fi
 
 # Verificar si es usuario root
 if [ "$EUID" -eq 0 ]; then
-    echo "❌ No ejecutar como root. Usa tu usuario normal."
-    exit 1
+  log_error "❌ No ejecutar como root. Usa tu usuario normal."
+  exit 1
 fi
 
 # Instalar dependencias
-echo "📦 Instalando dependencias del sistema..."
-sudo pacman -S --needed --noconfirm \
-    python-pip \
-    python-pyside6 \
-    whisper-cli \
-    piper-tts \
-    sox \
-    ollama \
-    ddgr \
-    kdialog \
-    noto-fonts \
-    ttf-hack \
-    jq \
-    curl \
-    wget
+log_info "📦 Instalando dependencias del sistema..."
+install_packages \
+  python-pip \
+  python-pyside6 \
+  whisper-cli \
+  piper-tts \
+  sox \
+  ollama \
+  ddgr \
+  kdialog \
+  noto-fonts \
+  ttf-hack \
+  jq \
+  curl \
+  wget \
+  git \
+  base-devel || {
+  log_error "Error instalando dependencias del sistema"
+  exit 1
+}
 
 # Instalar dependencias de Python
-echo "🐍 Instalando dependencias de Python..."
-pip install requests psutil
+log_info "🐍 Instalando dependencias de Python..."
+if ! pip install requests psutil; then
+  log_error "Error instalando dependencias de Python"
+  exit 1
+fi
 
 # Configurar Ollama si no está ejecutándose
-echo "🔧 Configurando Ollama..."
+log_info "🔧 Configurando Ollama..."
 if ! systemctl is-active --quiet ollama; then
-    echo "➡️ Iniciando servicio Ollama..."
-    sudo systemctl enable ollama
-    sudo systemctl start ollama
-    sleep 2
+  log_info "➡️ Iniciando servicio Ollama..."
+  sudo systemctl enable ollama || log_warning "No se pudo habilitar ollama"
+  sudo systemctl start ollama || log_warning "No se pudo iniciar ollama"
+  sleep 2
 fi
 
 # Verificar que Ollama esté funcionando
-if ! curl -s http://localhost:11434/api/tags > /dev/null; then
-    echo "⚠️  Ollama no responde, intentando reiniciar..."
-    sudo systemctl restart ollama
-    sleep 3
+if ! curl -s http://localhost:11434/api/tags >/dev/null; then
+  log_error "⚠️  Ollama no responde, intentando reiniciar..."
+  sudo systemctl restart ollama || log_warning "No se pudo reiniciar ollama"
+  sleep 3
 fi
 
 # Crear directorios de la aplicación
-echo "📁 Creando estructura de directorios..."
-mkdir -p ~/arch-chan-project/{models,temp,logs,configs,backups}
+log_info "📁 Creando estructura de directorios..."
+mkdir -p "$MODEL_DIR" "$CONFIG_DIR" "$LOG_DIR" "$APP_DIR/temp" "$APP_DIR/backups"
 
 # Descargar modelos de voz si no existen
-echo "🎙️ Verificando modelos de voz..."
-if [ ! -f ~/arch-chan-project/models/es_AR-daniela-high.onnx ]; then
-    echo "📥 Intentando descargar modelo de voz en español..."
-    # Intentar descargar automáticamente
-    if command -v wget > /dev/null; then
-        wget -O ~/arch-chan-project/models/es_AR-daniela-high.onnx \
-            "https://github.com/rhasspy/piper/releases/download/2023.10.11-2/es_AR-daniela-high.onnx" || \
-        echo "⚠️  No se pudo descargar automáticamente. Descarga manualmente de:"
-        echo "    https://github.com/rhasspy/piper/releases"
+log_info "🎙️ Verificando modelos de voz..."
+if [ ! -f "$MODEL_DIR/es_AR-daniela-high.onnx" ]; then
+  log_info "📥 Intentando descargar modelo de voz en español..."
+  # Intentar descargar automáticamente
+  if command_exists wget; then
+    if wget -O "$MODEL_DIR/es_AR-daniela-high.onnx" \
+      "https://github.com/rhasspy/piper/releases/download/2023.10.11-2/es_AR-daniela-high.onnx"; then
+      log_success "Modelo descargado correctamente"
     else
-        echo "⚠️  Instala wget para descarga automática o descarga manualmente:"
-        echo "    https://github.com/rhasspy/piper/releases"
+      log_warning "No se pudo descargar automáticamente. Descarga manualmente de:"
+      log_warning "    https://github.com/rhasspy/piper/releases"
     fi
+  else
+    log_warning "⚠️  Instala wget para descarga automática o descarga manualmente:"
+    log_warning "    https://github.com/rhasspy/piper/releases"
+  fi
 fi
 
-if [ ! -f ~/arch-chan-project/models/ggml-base.bin ]; then
-    echo "📥 Intentando descargar modelo de Whisper..."
-    # El usuario deberá descargar manualmente el modelo de Whisper
-    echo "⚠️  Para Whisper, descarga el modelo base de:"
-    echo "    https://github.com/ggerganov/whisper.cpp"
-    echo "    y colócalo en ~/arch-chan-project/models/ggml-base.bin"
+if [ ! -f "$MODEL_DIR/ggml-base.bin" ]; then
+  log_warning "Modelo Whisper no encontrado"
+  # El usuario deberá descargar manualmente el modelo de Whisper
+  log_info "⚠️  Para Whisper, descarga el modelo base de:"
+  log_info "    https://github.com/ggerganov/whisper.cpp"
+  log_info "    y colócalo en: $MODEL_DIR/ggml-base.bin"
 fi
 
 # Crear los modelos de Ollama
-echo "🧠 Creando modelos de IA..."
-if command -v ollama &> /dev/null; then
-    # Crear Arch-Chan si no existe
-    if ! ollama list | grep -q "arch-chan"; then
-        echo "📦 Creando modelo Arch-Chan..."
-        cat > Arch-Chan.Modelfile << 'EOF'
+log_info "🧠 Creando modelos de IA..."
+if command_exists ollama; then
+  # Crear Arch-Chan si no existe
+  if ! ollama list | grep -q "arch-chan"; then
+    log_info "📦 Creando modelo Arch-Chan..."
+    cat >Arch-Chan.Modelfile <<'EOF'
 FROM llama3.2:3b
 
 SYSTEM """
@@ -157,13 +202,13 @@ PARAMETER temperature 0.7
 PARAMETER top_k 40
 PARAMETER top_p 0.9
 EOF
-        ollama create arch-chan -f Arch-Chan.Modelfile
-    fi
-    
-    # Crear Arch-Chan-Lite si no existe
-    if ! ollama list | grep -q "arch-chan-lite"; then
-        echo "📦 Creando modelo Arch-Chan-Lite..."
-        cat > Arch-Chan-Lite.Modelfile << 'EOF'
+    ollama create arch-chan -f Arch-Chan.Modelfile
+  fi
+
+  # Crear Arch-Chan-Lite si no existe
+  if ! ollama list | grep -q "arch-chan-lite"; then
+    log_info "📦 Creando modelo Arch-Chan-Lite..."
+    cat >Arch-Chan-Lite.Modelfile <<'EOF'
 FROM gemma:2b
 
 SYSTEM """
@@ -203,13 +248,16 @@ Piensa: ¿realmente necesito ejecutar algo o buscar? Si no, responde normal.
 PARAMETER num_ctx 2048
 PARAMETER temperature 0.6
 EOF
-        ollama create arch-chan-lite -f Arch-Chan-Lite.Modelfile
-    fi
+    ollama create arch-chan-lite -f Arch-Chan-Lite.Modelfile
+  fi
 fi
 
 # Crear archivo desktop
-echo "🖥️ Creando lanzador de aplicación..."
-cat > ~/.local/share/applications/arch-chan.desktop << EOF
+log_info "🖥️ Creando lanzador de aplicación..."
+DESKTOP_DIR="$HOME/.local/share/applications"
+mkdir -p "$DESKTOP_DIR"
+
+cat >"$DESKTOP_DIR/arch-chan.desktop" <<EOF
 [Desktop Entry]
 Version=1.0
 Type=Application
@@ -224,31 +272,40 @@ Keywords=ai;assistant;archlinux;
 EOF
 
 # Crear script de actualización
-echo "🔄 Creando script de actualización..."
-cat > update_arch_chan.sh << 'EOF'
+log_info "🔄 Creando script de actualización..."
+cat >"$APP_DIR/update_arch_chan.sh" <<'EOF'
 #!/bin/bash
 echo "🔄 Actualizando Arch-Chan..."
 cd "$(dirname "$0")"
 git pull origin main
 python main.py --update
 EOF
-chmod +x update_arch_chan.sh
-
-# Hacer ejecutable el script principal
-chmod +x main.py
+chmod +x "$APP_DIR/update_arch_chan.sh"
 
 # Configurar permisos
-echo "🔒 Configurando permisos..."
+log_info "🔒 Configurando permisos..."
+find "$APP_DIR" -type f -name "*.sh" -exec chmod +x {} \;
+chmod +x main.py 2>/dev/null || true
 chmod 755 ~/arch-chan-project
 chmod 644 ~/arch-chan-project/models/* 2>/dev/null || true
 
+# Verificacion final
+log_info "Realizando verificaciones finales..."
+checks_passed=0
+checks_total=4
+
+[ -d "$APP_DIR" ] && ((checks_passed++))
+[ -f "$DESKTOP_DIR/arch-chan.desktop" ] && ((checks_passed++))
+command_exists ollama && ((checks_passed++))
+systemctl is-active --quiet ollama && ((checks_passed++))
+
 echo ""
-echo "🎉 ¡Instalación completada!"
+log_success "🎉 ¡Instalación completada! ($checks_passed/$checks_total verificaciones OK)"
 echo ""
-echo "📋 Próximos pasos:"
+echo -e "${BLUE}📋 Próximos pasos:${NC}"
 echo "   1. Asegúrate de que Ollama esté ejecutándose: systemctl --user status ollama"
-echo "   2. Verifica los modelos de voz en ~/arch-chan-project/models/"
+echo "   2. Verifica los modelos de voz en $MODEL_DIR"
 echo "   3. Ejecuta la aplicación: python main.py"
-echo "   4. Opcional: Busca 'Arch-Chan' en tu menú de aplicaciones"
+echo "   4. Opcional: Busca '$APP_NAME' en tu menú de aplicaciones"
 echo ""
-echo "🐧 ¡Disfruta de tu asistente de IA nativo de Arch Linux!"
+echo -e "${GREEN}🐧 ¡Disfruta de tu asistente de IA nativo de Arch Linux!${NC}"
