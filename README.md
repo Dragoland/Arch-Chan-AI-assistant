@@ -8,6 +8,10 @@
 
 Una asistente de IA nativa para Arch Linux con interfaz gráfica integrada, desarrollada en Python y PySide6. Utiliza Ollama para modelos de lenguaje local, Whisper para transcripción de voz y Piper para síntesis de voz.
 
+# ACLARACION!!!
+
+El programa todavia se encuentra en fase de desarrollo, todavia no existe en el repo AUR ni tampoco funciona al 100%, no existe ninguna release, toda copia existente que haya del software no es oficial, guiese por la informacion oficial.
+
 ## 🚀 Características Principales
 
 ### 🎨 Interfaz Nativa de Arch Linux
