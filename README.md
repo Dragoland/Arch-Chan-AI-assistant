@@ -141,10 +141,8 @@ sudo pacman -S --needed \
 ### Ejemplos de Interacción
 
 #### 💬 Conversación Normal
--Usuario: ¿Qué es Arch Linux?
--Arch-Chan: Arch Linux es una distribución Linux rolling release...
-text
-
+1. **Usuario**: ¿Qué es Arch Linux?
+2. **Arch-Chan**: Arch Linux es una distribución Linux rolling release...
 
 #### ⚡ Comandos Shell
 
