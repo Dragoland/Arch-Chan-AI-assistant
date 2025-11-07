@@ -1,0 +1,46 @@
+arch-chan-project/
+├── main.py                      # Punto de entrada mínimo
+├── core/                        # Lógica principal del negocio
+│   ├── __init__.py
+│   ├── application.py           # Clase principal de la aplicación
+│   ├── config_manager.py        # Gestión de configuración
+│   ├── dependency_checker.py    # Verificación de dependencias
+│   └── state_manager.py         # Gestión de estados
+├── ui/                          # Componentes de interfaz
+│   ├── __init__.py
+│   ├── main_window.py           # Ventana principal modularizada
+│   ├── components/              # Componentes UI reutilizables
+│   │   ├── __init__.py
+│   │   ├── chat_panel.py        # Panel de chat
+│   │   ├── side_panel.py        # Panel lateral del sistema
+│   │   ├── toolbar.py           # Barra de herramientas
+│   │   └── status_bar.py        # Barra de estado
+│   ├── dialogs/                 # Diálogos especializados
+│   │   ├── __init__.py
+│   │   ├── config_dialog.py     # Diálogo de configuración
+│   │   └── sudo_dialog.py       # Diálogo de confirmación sudo
+│   └── themes/                  # Sistema de temas
+│       ├── __init__.py
+│       └── arch_theme.py        # Temas de Arch Linux
+├── services/                    # Servicios externos
+│   ├── __init__.py
+│   ├── ollama_client.py         # Cliente de Ollama
+│   ├── speech_service.py        # Servicio de voz (TTS/STT)
+│   ├── command_executor.py      # Ejecutor de comandos
+│   └── system_monitor.py        # Monitoreo del sistema
+├── models/                      # Modelos de datos
+│   ├── __init__.py
+│   ├── chat_models.py           # Modelos de chat y mensajes
+│   ├── config_models.py         # Modelos de configuración
+│   └── system_models.py         # Modelos del sistema
+├── utils/                       # Utilidades
+│   ├── __init__.py
+│   ├── logger.py                # Sistema de logging
+│   ├── validators.py            # Validadores de seguridad
+│   ├── file_utils.py            # Utilidades de archivos
+│   └── constants.py             # Constantes globales
+└── workers/                     # Hilos de trabajo
+    ├── __init__.py
+    ├── base_worker.py           # Worker base
+    ├── chat_worker.py           # Worker de chat
+    └── voice_worker.py          # Worker de voz

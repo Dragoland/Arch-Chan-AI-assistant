@@ -1,6 +1,6 @@
 # Arch-Chan AI Assistant
 
-![Version](https://img.shields.io/badge/version-2.0-blue)
+![Version](https://img.shields.io/badge/version-2.1-blue)
 ![Arch Linux](https://img.shields.io/badge/Arch_Linux-1793D1?style=flat&logo=arch-linux&logoColor=white)
 ![Python](https://img.shields.io/badge/Python-3776AB?style=flat&logo=python&logoColor=white)
 ![Ollama](https://img.shields.io/badge/Ollama-0%20-00B588?style=flat)
@@ -34,55 +34,47 @@ Una asistente de IA nativa para Arch Linux con interfaz gráfica integrada, desa
 - **Gestión de Privilegios**: Confirmación gráfica para comandos sudo
 - **Notificaciones del Sistema**: Integración con KDE mediante kdialog
 
-## 📋 Requisitos del Sistema
+## 📦 Instalación
 
-### Sistema Operativo
-- **Arch Linux** (recomendado) o distribución compatible
-- Escritorio KDE Plasma (óptimo) o otro entorno de escritorio
+### Método 1: AUR (Recomendado para Arch Linux)
 
-### Dependencias Principales
 ```bash
-# Desde repositorios de Arch Linux
-sudo pacman -S --needed \
-    python-pip \
-    python-pyside6 \
-    whisper-cli \
-    piper-tts \
-    sox \
-    ollama \
-    ddgr \
-    kdialog \
-    noto-fonts \
-    ttf-hack
- ```
-## Modelos de IA Requeridos
-- **Ollama**: Servicio ejecutándose en `localhost:11434`
-- **Modelos Creados**: `arch-chan` y `arch-chan-lite`
+# Usando yay (o tu ayudante AUR favorito)
+yay -S arch-chan-ai-assistant
+```
 
-## Hardware Recomendado
-- **RAM**: 8GB mínimo, 16GB recomendado
-- **Almacenamiento**: 2GB para modelos base
-- **Micrófono**: Para funcionalidad de voz
-- **Altavoces**: Para respuestas de audio
+### Método 2: PIP
 
-## 🛠️ Instalación Rápida
+```bash
 
-### Método Automático (Recomendado)
+# Instalar desde PyPI
+pip install arch-chan-ai-assistant
+
+# Ejecutar
+arch-chan
+```
+
+### Método 3: Instalación Semi-automatica
+
 ```bash
 # Clonar el repositorio
-git clone https://github.com/tu-usuario/arch-chan.git
-cd arch-chan
+git clone https://github.com/Dragoland/Arch-Chan-AI-assistant.git
+cd Arch-Chan-AI-assistant
 
 # Ejecutar instalador nativo
-chmod +x install-arch-chan.sh
-./install-arch-chan.sh
+chmod +x install_arch_chan.sh
+./install_arch_chan.sh
 ```
-## 🛠️ Instalación Rápida
 
-### Método Manual
+### Método 4: Instalacion Manual
 ```bash
+
+# Clonar el repositorio
+git clone https://github.com/Dragoland/Arch-Chan-AI-assistant.git
+cd Arch-Chan-AI-assistant
+
 # 1. Instalar dependencias del sistema
-sudo pacman -S --needed python-pip python-pyside6 whisper-cli piper-tts sox ollama ddgr kdialog
+sudo pacman -S --needed python-pip python-pyside6 whisper.cpp piper-tts sox ollama ddgr kdialog
 
 # 2. Instalar dependencias de Python
 pip install requests
@@ -101,18 +93,44 @@ mkdir -p ~/arch-chan-project/{models,temp,logs}
 # 6. Ejecutar la aplicación
 python main.py
 ```
-### Método Automático
+
+
+## 📋 Requisitos del Sistema
+
+### Sistema Operativo
+- **Arch Linux** (recomendado) o distribución compatible
+- **Escritorio KDE Plasma** (óptimo) o otro entorno de escritorio
+
+### Dependencias Principales
+
 ```bash
-# Clonar el repositorio y ejecutar instalador
-git clone https://github.com/tu-usuario/arch-chan.git
-cd arch-chan
-chmod +x install-arch-chan.sh
-./install-arch-chan.sh
-```
+# Desde repositorios de Arch Linux
+sudo pacman -S --needed \
+    python-pip \
+    whisper.cpp \
+    piper-tts \
+    sox \
+    ollama \
+    ddgr \
+    kdialog \
+    noto-fonts \
+    ttf-hack
+ ```
+
+## Modelos de IA Requeridos
+- **Ollama**: Servicio ejecutándose en `localhost:11434`
+- **Modelos Creados**: `arch-chan` y `arch-chan-lite`
+
+## Hardware Recomendado
+- **RAM**: 8GB mínimo, 16GB recomendado
+- **Almacenamiento**: 2GB para modelos base
+- **Micrófono**: Para funcionalidad de voz
+- **Altavoces**: Para respuestas de audio
+
 ## 🎯 Uso
 
 ### Inicio Rápido
-1. **Ejecutar la aplicación**: `python main.py` o buscar "Arch-Chan" en el menú de aplicaciones
+1. **Ejecutar la aplicación**: `arch-chan` o buscar "Arch-Chan" en el menú de aplicaciones
 2. **Seleccionar modelo**: Elegir entre `arch-chan` (completo) o `arch-chan-lite` (ligero)
 3. **Interactuar**: Usar voz (botón 🎤) o texto (campo de entrada)
 
@@ -120,7 +138,6 @@ chmod +x install-arch-chan.sh
 
 #### 💬 Conversación Normal
 -Usuario: ¿Qué es Arch Linux?
-
 -Arch-Chan: Arch Linux es una distribución Linux rolling release...
 text
 
@@ -128,7 +145,6 @@ text
 #### ⚡ Comandos Shell
 
 -Usuario: Muestra qué procesos consumen más CPU
-
 -Arch-Chan: 
 ```json
 {"tool": "shell", 
@@ -136,18 +152,14 @@ text
 "explanation": "Voy a mostrar los 10 procesos que más CPU consumen"}
 ```
 
-
 #### 🔍 Búsquedas Web
 
 -Usuario: Busca noticias recientes sobre Arch Linux
-
 -Arch-Chan: 
 ```json
 {"tool": "search", 
 "query": "noticias Arch Linux actualizaciones recientes"}
 ```
-
-
 
 ### Controles Principales
 - **🎤 Voz**: Grabar audio para transcripción
@@ -160,23 +172,32 @@ text
 
 ```
 arch-chan-project/
-├── main.py # Aplicación principal con interfaz gráfica
-├── worker.py # Hilo de trabajo para procesamiento
-├── config.py # Configuración y constantes
-├── install-arch-chan.sh # Script de instalación para Arch Linux
-├── Arch-Chan.Modelfile # Definición del modelo principal
-├── Arch-Chan-Lite.Modelfile # Definición del modelo ligero
-│
-├── models/ # Modelos de IA y voz
-│ ├── es_AR-daniela-high.onnx # Modelo de voz Piper
-│ ├── es_AR-daniela-high.onnx.json # Configuración de voz
-│ └── ggml-base.bin # Modelo Whisper
-│
-├── temp/ # Archivos temporales
-│ └── input.wav # Grabación de audio temporal
-│
-└── logs/ # Registros de la aplicación
-  └── arch-chan_*.log # Archivos de log con timestamp
+├── main.py                      # Punto de entrada
+├── core/                        # Lógica principal
+│   ├── application.py           # Clase principal de la aplicación
+│   ├── config_manager.py        # Gestión de configuración
+│   └── state_manager.py         # Gestión de estados
+├── ui/                          # Componentes de interfaz
+│   ├── main_window.py           # Ventana principal
+│   ├── components/              # Componentes UI reutilizables
+│   ├── dialogs/                 # Diálogos especializados
+│   └── themes/                  # Sistema de temas
+├── services/                    # Servicios externos
+│   ├── ollama_client.py         # Cliente de Ollama
+│   ├── speech_service.py        # Servicio de voz
+│   └── command_executor.py      # Ejecutor de comandos
+├── workers/                     # Hilos de trabajo
+│   ├── base_worker.py           # Worker base
+│   ├── chat_worker.py           # Worker de chat
+│   └── voice_worker.py          # Worker de voz
+├── models/                      # Modelos de datos
+│   ├── chat_models.py           # Modelos de chat
+│   ├── config_models.py         # Modelos de configuración
+│   └── system_models.py         # Modelos del sistema
+└── utils/                       # Utilidades
+    ├── logger.py                # Sistema de logging
+    ├── validators.py            # Validadores de seguridad
+    └── file_utils.py            # Utilidades de archivos
 ```
 
 ## 🔧 Configuración
@@ -232,10 +253,10 @@ curl http://localhost:11434/api/tags
 #### Error de Dependencias
 ```bash
 # Reinstalar dependencias faltantes
-sudo pacman -S whisper-cli piper-tts sox
+sudo pacman -S whisper.cpp piper-tts sox
 
 # Verificar instalación
-which whisper-cli piper-tts rec
+which whisper.cpp piper-tts rec
 ```
 
 #### Problemas de Audio

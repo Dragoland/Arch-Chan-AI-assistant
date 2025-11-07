@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "arch-chan-ai-assistant"
+version = "2.1.0"
+description = "Una asistente de IA nativa para Arch Linux con interfaz gráfica integrada"
+readme = "README.md"
+requires-python = ">=3.8"
+license = {text = "MIT"}
+authors = [
+    {name = "Dragoland", email = "dragoland@protonmail.com"},
+]
+keywords = ["ai", "assistant", "arch-linux", "ollama", "voice"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: End Users/Desktop",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Topic :: Desktop Environment",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+
+[project.urls]
+Homepage = "https://github.com/Dragoland/Arch-Chan-AI-assistant"
+"Bug Tracker" = "https://github.com/Dragoland/Arch-Chan-AI-assistant/issues"
+
+[project.scripts]
+arch-chan = "main:main"
+arch-chan-setup-models = "setup_models:main"

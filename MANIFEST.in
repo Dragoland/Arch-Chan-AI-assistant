@@ -1,0 +1,13 @@
+include *.md
+include *.txt
+include *.desktop
+include *.sh
+include *.Modelfile
+include LICENSE
+include CHANGELOG.md
+recursive-include core *
+recursive-include ui *
+recursive-include services *
+recursive-include workers *
+recursive-include models *
+recursive-include utils *

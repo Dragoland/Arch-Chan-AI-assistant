@@ -4,6 +4,36 @@ Registro de actualizaciones y cambios importantes del proyecto.
 
 ---
 
+## Versión 2.1 (Fecha) - Arquitectura Modular y Mejoras de Empaquetado
+
+### 🏗️ Arquitectura y Código
+- **Refactorización Modular**: Separación del código en módulos especializados (core, ui, services, workers, models, utils)
+- **Mejora de Mantenibilidad**: Código más limpio y fácil de extender
+- **Patrón de Diseño**: Implementación de señales Qt para comunicación entre componentes
+
+### 🚀 Nuevas Características
+- **Sistema de Temas**: Múltiples temas incluidos (Arch Dark, Arch Light, Blue Matrix, Green Terminal, Purple Haze)
+- **Monitoreo del Sistema**: Panel lateral con información en tiempo real del sistema
+- **Gestión de Estado**: State manager centralizado para controlar el estado de la aplicación
+
+### 🛠️ Mejoras Técnicas
+- **Servicios Modulares**: Clientes para Ollama, voz, comandos y monitoreo del sistema
+- **Workers Especializados**: Procesamiento en hilos para chat y voz
+- **Validadores de Seguridad**: Validación robusta de comandos y entradas
+- **Utilidades de Archivo**: Manejo seguro de archivos y directorios
+
+### 📦 Empaquetado
+- **Soporte AUR**: PKGBUILD para distribución en Arch User Repository
+- **Soporte PIP**: setup.py para instalación via pip
+- **Script de Instalación Mejorado**: install_arch_chan.sh actualizado
+
+### 🐛 Correcciones
+- **Manejo de Errores**: Mejor manejo de excepciones en todos los módulos
+- **Rendimiento**: Optimización del uso de memoria y CPU
+- **Estabilidad**: Corrección de condiciones de carrera en hilos
+
+---
+
 ## Versión 1.0 (2 de Noviembre de 2025) - Optimización y Pulido Final
 
 ### 🚀 Rendimiento y Optimización
