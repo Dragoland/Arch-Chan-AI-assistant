@@ -148,8 +148,8 @@ text
 
 #### ⚡ Comandos Shell
 
--Usuario: Muestra qué procesos consumen más CPU
--Arch-Chan: 
+1. **Usuario**: Muestra qué procesos consumen más CPU
+2. **Arch-Chan**: 
 ```json
 {"tool": "shell", 
 "command": "ps aux --sort=-%cpu | head -10", 
@@ -158,8 +158,8 @@ text
 
 #### 🔍 Búsquedas Web
 
--Usuario: Busca noticias recientes sobre Arch Linux
--Arch-Chan: 
+1. **Usuario**: Busca noticias recientes sobre Arch Linux
+2. **Arch-Chan**: 
 ```json
 {"tool": "search", 
 "query": "noticias Arch Linux actualizaciones recientes"}
