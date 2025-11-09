@@ -3,6 +3,7 @@
 
 import os
 import subprocess
+import tempfile
 import time
 from typing import Optional, Tuple
 
@@ -34,14 +35,19 @@ class SpeechService(QObject):
         super().__init__()
         self.logger = get_logger("SpeechService")
 
+        # Rutas de ejecutables
         self.piper_path = piper_path
         self.whisper_path = whisper_path
         self.aplay_path = aplay_path
         self.rec_path = rec_path
 
+        # Estado
         self.current_process: Optional[QProcess] = None
         self.is_speaking = False
         self.is_recording = False
+
+        # Directorio temporal
+        self.temp_dir = tempfile.gettempdir()
 
         self.logger.info("SpeechService inicializado")
 
@@ -64,7 +70,7 @@ class SpeechService(QObject):
         Returns:
             True si la conversión fue exitosa
         """
-        if not text.strip():
+        if not text or not text.strip():
             self.logger.warning("Texto vacío para TTS")
             return False
 
@@ -77,51 +83,55 @@ class SpeechService(QObject):
                 text = text[:1000] + "..."
                 self.logger.warning("Texto truncado para TTS")
 
-            # Comando de Piper para sintetizar audio
+            # Usar archivo temporal para el audio
+            temp_audio = os.path.join(self.temp_dir, "tts_output.wav")
+
+            # Comando de Piper para sintetizar audio a archivo
             piper_command = [
                 self.piper_path,
                 "--model",
                 model_path,
                 "--output_file",
-                "-",  # Salida estándar
-            ]
-
-            # Comando de aplay para reproducir audio
-            aplay_command = [
-                self.aplay_path,
-                "-r",
-                str(sample_rate),
-                "-f",
-                "S16_LE",
-                "-t",
-                "raw",
-                "-",
+                temp_audio,
             ]
 
             self.logger.info(f"Iniciando síntesis de voz: {text[:50]}...")
 
-            # Ejecutar Piper y conectar su salida a aplay
-            piper_process = subprocess.Popen(
+            # Ejecutar Piper para generar archivo de audio
+            piper_process = subprocess.run(
                 piper_command,
-                stdin=subprocess.PIPE,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
+                input=text.encode("utf-8"),
+                capture_output=True,
+                text=False,  # Usar bytes para stdin
+                timeout=30,  # Timeout de 30 segundos
             )
 
-            aplay_process = subprocess.Popen(
-                aplay_command,
-                stdin=piper_process.stdout,
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
+            if piper_process.returncode != 0:
+                error_msg = f"Piper falló: {piper_process.stderr.decode('utf-8', errors='ignore')}"
+                self.logger.error(error_msg)
+                raise Exception(error_msg)
+
+            # Verificar que el archivo se creó
+            if not os.path.exists(temp_audio):
+                raise Exception("Piper no generó archivo de audio")
+
+            # Reproducir archivo con aplay
+            aplay_command = [self.aplay_path, "-q", temp_audio]  # Modo silencioso
+
+            aplay_process = subprocess.run(
+                aplay_command, capture_output=True, timeout=30
             )
 
-            # Enviar texto a Piper
-            piper_process.stdin.write(text.encode("utf-8"))
-            piper_process.stdin.close()
+            # Limpiar archivo temporal
+            try:
+                os.remove(temp_audio)
+            except:
+                pass
 
-            # Esperar a que termine la síntesis
-            piper_process.wait()
-            aplay_process.wait()
+            if aplay_process.returncode != 0:
+                error_msg = f"Error reproduciendo audio: {aplay_process.stderr.decode('utf-8', errors='ignore')}"
+                self.logger.error(error_msg)
+                raise Exception(error_msg)
 
             self.synthesis_finished.emit()
             self.is_speaking = False
@@ -129,8 +139,15 @@ class SpeechService(QObject):
 
             return True
 
+        except subprocess.TimeoutExpired:
+            error_msg = "Síntesis de voz excedió el tiempo límite"
+            self.logger.error(error_msg)
+            self.error_occurred.emit(error_msg)
+            self.is_speaking = False
+            return False
+
         except Exception as e:
-            error_msg = f"Error en síntesis de voz: {e}"
+            error_msg = f"Error en síntesis de voz: {str(e)}"
             self.logger.error(error_msg)
             self.error_occurred.emit(error_msg)
             self.is_speaking = False
@@ -162,6 +179,12 @@ class SpeechService(QObject):
         try:
             self.logger.info(f"Iniciando transcripción de audio: {audio_file}")
 
+            # Usar archivo temporal para la salida
+            base_name = os.path.splitext(audio_file)[0]
+            output_file = os.path.join(
+                self.temp_dir, f"transcription_{os.path.basename(base_name)}"
+            )
+
             whisper_command = [
                 self.whisper_path,
                 "-m",
@@ -172,7 +195,7 @@ class SpeechService(QObject):
                 language,
                 "-otxt",
                 "-of",
-                os.path.splitext(audio_file)[0],  # Mismo nombre sin extensión
+                output_file,
                 "--timeout",
                 str(timeout * 1000),  # Whisper espera en milisegundos
             ]
@@ -186,13 +209,19 @@ class SpeechService(QObject):
                 return None
 
             # Leer el archivo de texto generado
-            text_file = audio_file + ".txt"
+            text_file = output_file + ".txt"
             if not os.path.exists(text_file):
                 self.logger.error(f"Archivo de transcripción no generado: {text_file}")
                 return None
 
             with open(text_file, "r", encoding="utf-8") as f:
                 transcribed_text = f.read().strip()
+
+            # Limpiar archivo temporal
+            try:
+                os.remove(text_file)
+            except:
+                pass
 
             self.logger.info(f"Transcripción completada: {transcribed_text[:50]}...")
             self.transcription_ready.emit(transcribed_text)
@@ -206,7 +235,7 @@ class SpeechService(QObject):
             return None
 
         except Exception as e:
-            error_msg = f"Error en transcripción de voz: {e}"
+            error_msg = f"Error en transcripción de voz: {str(e)}"
             self.logger.error(error_msg)
             self.error_occurred.emit(error_msg)
             return None
@@ -236,6 +265,7 @@ class SpeechService(QObject):
 
             self.logger.info("Iniciando grabación de audio...")
 
+            # Usar sox (rec) para grabación con detección de silencio
             record_command = [
                 self.rec_path,
                 "-r",
@@ -269,17 +299,27 @@ class SpeechService(QObject):
                 self.logger.error(f"Error en grabación: {result.stderr}")
                 return False
 
-            self.logger.info(f"Grabación completada: {output_file}")
-            return os.path.exists(output_file)
+            # Verificar que se creó el archivo y tiene contenido
+            if not os.path.exists(output_file):
+                self.logger.error("Archivo de grabación no creado")
+                return False
+
+            file_size = os.path.getsize(output_file)
+            if file_size == 0:
+                self.logger.error("Archivo de grabación vacío")
+                return False
+
+            self.logger.info(f"Grabación completada: {output_file} ({file_size} bytes)")
+            return True
 
         except subprocess.TimeoutExpired:
             self.logger.info("Grabación finalizada por tiempo")
             self.is_recording = False
             self.recording_finished.emit()
-            return os.path.exists(output_file)
+            return os.path.exists(output_file) and os.path.getsize(output_file) > 0
 
         except Exception as e:
-            error_msg = f"Error en grabación de audio: {e}"
+            error_msg = f"Error en grabación de audio: {str(e)}"
             self.logger.error(error_msg)
             self.error_occurred.emit(error_msg)
             self.is_recording = False
@@ -293,8 +333,7 @@ class SpeechService(QObject):
             and self.current_process.state() == QProcess.ProcessState.Running
         ):
             self.current_process.terminate()
-            self.current_process.wait(2000)  # Esperar 2 segundos
-            if self.current_process.state() == QProcess.ProcessState.Running:
+            if not self.current_process.wait(2000):  # Esperar 2 segundos
                 self.current_process.kill()
 
         self.is_speaking = False
@@ -303,26 +342,27 @@ class SpeechService(QObject):
 
     def is_available(self) -> bool:
         """Verifica si el servicio de voz está disponible"""
-        try:
-            # Verificar Piper
-            subprocess.run(
-                [self.piper_path, "--version"], capture_output=True, timeout=5
-            )
-            # Verificar Whisper
-            subprocess.run(
-                [self.whisper_path, "--help"], capture_output=True, timeout=5
-            )
-            # Verificar rec (sox)
-            subprocess.run([self.rec_path, "--version"], capture_output=True, timeout=5)
-            # Verificar aplay
-            subprocess.run(
-                [self.aplay_path, "--version"], capture_output=True, timeout=5
-            )
+        tools = {
+            "Piper": [self.piper_path, "--version"],
+            "Whisper": [self.whisper_path, "--help"],
+            "rec (sox)": [self.rec_path, "--version"],
+            "aplay": [self.aplay_path, "--version"],
+        }
 
-            return True
+        for tool_name, command in tools.items():
+            try:
+                result = subprocess.run(
+                    command, capture_output=True, timeout=5, check=False
+                )
+                if result.returncode != 0:
+                    self.logger.warning(f"{tool_name} no disponible")
+                    return False
+            except Exception as e:
+                self.logger.warning(f"Error verificando {tool_name}: {str(e)}")
+                return False
 
-        except:
-            return False
+        self.logger.info("Todos los componentes de voz están disponibles")
+        return True
 
     def get_audio_devices(self) -> Tuple[list, list]:
         """
@@ -342,7 +382,7 @@ class SpeechService(QObject):
             if result.returncode == 0:
                 lines = result.stdout.split("\n")
                 for line in lines:
-                    if "card" in line:
+                    if "card" in line and "device" in line:
                         input_devices.append(line.strip())
 
             # Obtener dispositivos de salida
@@ -352,10 +392,10 @@ class SpeechService(QObject):
             if result.returncode == 0:
                 lines = result.stdout.split("\n")
                 for line in lines:
-                    if "card" in line:
+                    if "card" in line and "device" in line:
                         output_devices.append(line.strip())
 
         except Exception as e:
-            self.logger.warning(f"Error obteniendo dispositivos de audio: {e}")
+            self.logger.warning(f"Error obteniendo dispositivos de audio: {str(e)}")
 
         return input_devices, output_devices

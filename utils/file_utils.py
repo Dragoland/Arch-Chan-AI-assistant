@@ -11,12 +11,14 @@ from typing import Any, Dict, List, Optional
 
 from utils.logger import get_logger
 
+_logger = get_logger("FileUtils")
+
 
 class FileUtils:
     """Utilidades para manejo de archivos y directorios"""
 
     def __init__(self):
-        self.logger = get_logger("FileUtils")
+        self.logger = _logger
 
     @staticmethod
     def ensure_directory(directory: str) -> bool:
@@ -30,10 +32,11 @@ class FileUtils:
             True si el directorio existe o fue creado
         """
         try:
+            directory = os.path.expanduser(directory)
             Path(directory).mkdir(parents=True, exist_ok=True)
             return True
         except Exception as e:
-            get_logger("FileUtils").error(f"Error creando directorio {directory}: {e}")
+            _logger.error(f"Error creando directorio {directory}: {str(e)}")
             return False
 
     @staticmethod
@@ -48,11 +51,12 @@ class FileUtils:
             True si fue eliminado o no existía
         """
         try:
+            file_path = os.path.expanduser(file_path)
             if os.path.exists(file_path):
                 os.remove(file_path)
             return True
         except Exception as e:
-            get_logger("FileUtils").error(f"Error eliminando archivo {file_path}: {e}")
+            _logger.error(f"Error eliminando archivo {file_path}: {str(e)}")
             return False
 
     @staticmethod
@@ -68,7 +72,9 @@ class FileUtils:
         Returns:
             True si la escritura fue exitosa
         """
+        temp_path = None
         try:
+            file_path = os.path.expanduser(file_path)
             # Crear directorio si no existe
             directory = os.path.dirname(file_path)
             FileUtils.ensure_directory(directory)
@@ -93,10 +99,13 @@ class FileUtils:
             return True
 
         except Exception as e:
-            get_logger("FileUtils").error(f"Error escribiendo archivo {file_path}: {e}")
+            _logger.error(f"Error escribiendo archivo {file_path}: {str(e)}")
             # Limpiar archivo temporal si existe
-            if os.path.exists(temp_path):
-                os.remove(temp_path)
+            if temp_path and os.path.exists(temp_path):
+                try:
+                    os.remove(temp_path)
+                except:
+                    pass
             return False
 
     @staticmethod
@@ -111,10 +120,11 @@ class FileUtils:
             Contenido del archivo o None en caso de error
         """
         try:
+            file_path = os.path.expanduser(file_path)
             with open(file_path, "r", encoding="utf-8") as f:
                 return f.read()
         except Exception as e:
-            get_logger("FileUtils").error(f"Error leyendo archivo {file_path}: {e}")
+            _logger.error(f"Error leyendo archivo {file_path}: {str(e)}")
             return None
 
     @staticmethod
@@ -134,7 +144,10 @@ class FileUtils:
                 return None
             return json.loads(content)
         except json.JSONDecodeError as e:
-            get_logger("FileUtils").error(f"Error decodificando JSON {file_path}: {e}")
+            _logger.error(f"Error decodificando JSON {file_path}: {str(e)}")
+            return None
+        except Exception as e:
+            _logger.error(f"Error leyendo JSON {file_path}: {str(e)}")
             return None
 
     @staticmethod
@@ -154,7 +167,7 @@ class FileUtils:
             content = json.dumps(data, indent=indent, ensure_ascii=False)
             return FileUtils.safe_write(file_path, content)
         except Exception as e:
-            get_logger("FileUtils").error(f"Error escribiendo JSON {file_path}: {e}")
+            _logger.error(f"Error escribiendo JSON {file_path}: {str(e)}")
             return False
 
     @staticmethod
@@ -170,13 +183,14 @@ class FileUtils:
             Hash del archivo o None en caso de error
         """
         try:
+            file_path = os.path.expanduser(file_path)
             hash_func = hashlib.new(algorithm)
             with open(file_path, "rb") as f:
                 for chunk in iter(lambda: f.read(4096), b""):
                     hash_func.update(chunk)
             return hash_func.hexdigest()
         except Exception as e:
-            get_logger("FileUtils").error(f"Error calculando hash de {file_path}: {e}")
+            _logger.error(f"Error calculando hash de {file_path}: {str(e)}")
             return None
 
     @staticmethod
@@ -192,12 +206,11 @@ class FileUtils:
             Lista de rutas de archivos encontrados
         """
         try:
+            directory = os.path.expanduser(directory)
             directory_path = Path(directory)
             return [str(p) for p in directory_path.rglob(pattern)]
         except Exception as e:
-            get_logger("FileUtils").error(
-                f"Error buscando archivos en {directory}: {e}"
-            )
+            _logger.error(f"Error buscando archivos en {directory}: {str(e)}")
             return []
 
     @staticmethod
@@ -212,11 +225,10 @@ class FileUtils:
             Tamaño en bytes o None en caso de error
         """
         try:
+            file_path = os.path.expanduser(file_path)
             return os.path.getsize(file_path)
         except Exception as e:
-            get_logger("FileUtils").error(
-                f"Error obteniendo tamaño de {file_path}: {e}"
-            )
+            _logger.error(f"Error obteniendo tamaño de {file_path}: {str(e)}")
             return None
 
     @staticmethod
@@ -233,24 +245,27 @@ class FileUtils:
             Número de archivos eliminados
         """
         try:
+            directory = os.path.expanduser(directory)
             deleted_count = 0
             now = datetime.now()
             max_age_seconds = max_age_days * 24 * 60 * 60
 
             for file_path in FileUtils.find_files(directory, pattern):
-                file_time = datetime.fromtimestamp(os.path.getmtime(file_path))
-                file_age = (now - file_time).total_seconds()
+                try:
+                    file_time = datetime.fromtimestamp(os.path.getmtime(file_path))
+                    file_age = (now - file_time).total_seconds()
 
-                if file_age > max_age_seconds:
-                    if FileUtils.safe_delete(file_path):
-                        deleted_count += 1
+                    if file_age > max_age_seconds:
+                        if FileUtils.safe_delete(file_path):
+                            deleted_count += 1
+                except Exception as e:
+                    _logger.warning(f"Error procesando archivo {file_path}: {str(e)}")
+                    continue
 
             return deleted_count
 
         except Exception as e:
-            get_logger("FileUtils").error(
-                f"Error limpiando archivos en {directory}: {e}"
-            )
+            _logger.error(f"Error limpiando archivos en {directory}: {str(e)}")
             return 0
 
     @staticmethod
@@ -266,6 +281,9 @@ class FileUtils:
             True si la copia fue exitosa
         """
         try:
+            source = os.path.expanduser(source)
+            destination = os.path.expanduser(destination)
+
             # Crear directorio de destino si no existe
             FileUtils.ensure_directory(os.path.dirname(destination))
 
@@ -274,7 +292,5 @@ class FileUtils:
             return True
 
         except Exception as e:
-            get_logger("FileUtils").error(
-                f"Error copiando {source} a {destination}: {e}"
-            )
+            _logger.error(f"Error copiando {source} a {destination}: {str(e)}")
             return False

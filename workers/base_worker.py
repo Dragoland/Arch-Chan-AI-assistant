@@ -3,13 +3,16 @@
 
 from typing import Any, Optional
 
-from PySide6.QtCore import QMutex, QThread, QWaitCondition, Signal
+from PySide6.QtCore import QObject, Signal, Slot
 
 from utils.logger import get_logger
 
 
-class BaseWorker(QThread):
-    """Clase base para todos los workers de la aplicación"""
+class BaseWorker(QObject):
+    """
+    Clase base para todos los workers (Patrón moveToThread)
+    Hereda de QObject, no de QThread.
+    """
 
     # Señales base
     started = Signal()  # Worker iniciado
@@ -23,21 +26,26 @@ class BaseWorker(QThread):
 
         # Control de ejecución
         self._is_running = False
-        self._is_paused = False
         self._should_stop = False
-
-        # Sincronización
-        self.mutex = QMutex()
-        self.condition = QWaitCondition()
 
         # Resultados
         self._result: Optional[Any] = None
         self._error: Optional[str] = None
 
+        # Configurar para eliminación segura
+        self.setObjectName(f"{self.__class__.__name__}_{id(self)}")
+
         self.logger.debug(f"{self.__class__.__name__} inicializado")
 
+    @Slot()
     def run(self):
-        """Método principal del worker"""
+        """Método principal del worker (ahora es un Slot)"""
+        if self._is_running:
+            self.logger.warning(
+                f"Worker {self.__class__.__name__} ya está en ejecución"
+            )
+            return
+
         try:
             self._is_running = True
             self._should_stop = False
@@ -48,12 +56,19 @@ class BaseWorker(QThread):
             # Ejecutar la tarea principal
             self._result = self._execute()
 
-            self.logger.info(f"Worker {self.__class__.__name__} completado")
+            if self._should_stop:
+                self.logger.info(
+                    f"Worker {self.__class__.__name__} detenido por solicitud"
+                )
+                self._result = {"status": "cancelled"}
+            else:
+                self.logger.info(f"Worker {self.__class__.__name__} completado")
 
         except Exception as e:
-            error_msg = f"Error en worker {self.__class__.__name__}: {e}"
-            self.logger.error(error_msg)
+            error_msg = f"Error en worker {self.__class__.__name__}: {str(e)}"
+            self.logger.error(error_msg, exc_info=True)
             self._error = error_msg
+            self._result = {"status": "error", "error": error_msg}
             self.error_occurred.emit(error_msg)
 
         finally:
@@ -69,31 +84,12 @@ class BaseWorker(QThread):
         """
         raise NotImplementedError("Las subclases deben implementar _execute()")
 
+    @Slot()
     def stop(self):
-        """Solicita la detención del worker"""
-        self.logger.info(f"Solicitando detención de {self.__class__.__name__}")
-        self._should_stop = True
-        self.resume()  # Reanudar si está pausado para que pueda detenerse
-
-    def pause(self):
-        """Pausa la ejecución del worker"""
-        if self._is_running and not self._is_paused:
-            self.logger.info(f"Pausando {self.__class__.__name__}")
-            self._is_paused = True
-
-    def resume(self):
-        """Reanuda la ejecución del worker"""
-        if self._is_running and self._is_paused:
-            self.logger.info(f"Reanudando {self.__class__.__name__}")
-            self._is_paused = False
-            self.condition.wakeAll()
-
-    def wait_if_paused(self):
-        """Espera si el worker está pausado"""
-        while self._is_paused and not self._should_stop:
-            self.mutex.lock()
-            self.condition.wait(self.mutex)
-            self.mutex.unlock()
+        """Solicita la detención del worker (ahora es un Slot)"""
+        if self._is_running:
+            self.logger.info(f"Solicitando detención de {self.__class__.__name__}")
+            self._should_stop = True
 
     def check_stopped(self) -> bool:
         """
@@ -119,11 +115,6 @@ class BaseWorker(QThread):
         return self._is_running
 
     @property
-    def is_paused(self) -> bool:
-        """Indica si el worker está pausado"""
-        return self._is_paused
-
-    @property
     def result(self) -> Optional[Any]:
         """Retorna el resultado de la ejecución"""
         return self._result
@@ -133,7 +124,12 @@ class BaseWorker(QThread):
         """Retorna el error ocurrido"""
         return self._error
 
-    @property
-    def was_successful(self) -> bool:
-        """Indica si la ejecución fue exitosa"""
-        return self._result is not None and self._error is None
+    def safe_delete(self):
+        """Eliminación segura del worker"""
+        try:
+            if self._is_running:
+                self.stop()
+            # Desconectar todas las señales
+            self.disconnect()
+        except Exception as e:
+            self.logger.debug(f"Error en safe_delete: {str(e)}")

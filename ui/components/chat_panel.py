@@ -1,10 +1,15 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+"""
+Panel de chat completamente reescrito para Arch-Chan v2.1
+Con interfaz moderna, animaciones y mejoras de usabilidad
+"""
+
 from datetime import datetime
 
-from PySide6.QtCore import QTimer, Signal
-from PySide6.QtGui import QTextCursor
+from PySide6.QtCore import Qt, QTimer, Signal
+from PySide6.QtGui import QColor, QFont, QTextCharFormat, QTextCursor
 from PySide6.QtWidgets import (
     QComboBox,
     QFrame,
@@ -18,12 +23,13 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from services import ollama_client
 from ui.themes.arch_theme import ArchLinuxTheme
 from utils.logger import get_logger
 
 
 class ChatPanel(QWidget):
-    """Panel principal de chat mejorado y modularizado"""
+    """Panel principal de chat con interfaz moderna y mejoras de UX"""
 
     # Señales
     voice_flow_started = Signal()
@@ -31,6 +37,7 @@ class ChatPanel(QWidget):
     worker_stop_requested = Signal()
     model_changed = Signal(str)
     theme_change_requested = Signal(str)
+    performance_metrics_updated = Signal(dict)
 
     def __init__(self, config_manager, state_manager):
         super().__init__()
@@ -41,6 +48,8 @@ class ChatPanel(QWidget):
         self.chat_history = []
         self.current_theme = self.config_manager.get("UI", "theme", "arch-dark")
         self.processing = False
+        self.voice_recording = False
+        self.typing_indicator_active = False
 
         self._create_ui()
         self._setup_animations()
@@ -111,15 +120,30 @@ class ChatPanel(QWidget):
         parent_layout.addWidget(header_frame)
 
     def _create_chat_area(self, parent_layout):
-        """Crea el área de chat"""
+        """Crea el área de chat con scroll mejorado"""
         self.chat_area = QTextEdit()
         self.chat_area.setObjectName("chat_area")
         self.chat_area.setReadOnly(True)
         self.chat_area.document().setDocumentMargin(12)
+        self.chat_area.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+        self.chat_area.setHorizontalScrollBarPolicy(
+            Qt.ScrollBarPolicy.ScrollBarAlwaysOff
+        )
+
+        # Configurar fuente para mejor legibilidad
+        font = QFont("Noto Sans", 10)
+        self.chat_area.setFont(font)
+
+        parent_layout.addWidget(self.chat_area)
+
+        # Configurar fuente para mejor legibilidad
+        font = QFont("Noto Sans", 10)
+        self.chat_area.setFont(font)
+
         parent_layout.addWidget(self.chat_area)
 
     def _create_progress_bar(self, parent_layout):
-        """Crea la barra de progreso"""
+        """Crea la barra de progreso animada"""
         self.progress_bar = QProgressBar()
         self.progress_bar.setObjectName("progress_bar")
         self.progress_bar.setVisible(False)
@@ -128,7 +152,7 @@ class ChatPanel(QWidget):
         parent_layout.addWidget(self.progress_bar)
 
     def _create_status_panel(self, parent_layout):
-        """Crea el panel de estado"""
+        """Crea el panel de estado con indicadores"""
         status_frame = QFrame()
         status_frame.setObjectName("status_frame")
         status_layout = QHBoxLayout(status_frame)
@@ -148,9 +172,7 @@ class ChatPanel(QWidget):
         self.voice_indicator.setObjectName("voice_indicator")
 
         self.connection_indicator = QLabel("🌐 Conectado")
-        self.connection_indicator.setObjectName(
-            "connection_indicator"
-        )  # CORREGIDO: ID para CSS
+        self.connection_indicator.setObjectName("connection_indicator")
 
         indicators_layout.addWidget(self.voice_indicator)
         indicators_layout.addWidget(self.connection_indicator)
@@ -160,7 +182,7 @@ class ChatPanel(QWidget):
         parent_layout.addWidget(status_frame)
 
     def _create_input_controls(self, parent_layout):
-        """Crea los controles de entrada"""
+        """Crea los controles de entrada mejorados"""
         input_frame = QFrame()
         input_frame.setObjectName("input_frame")
         input_layout = QHBoxLayout(input_frame)
@@ -171,6 +193,7 @@ class ChatPanel(QWidget):
         self.voice_button = QPushButton("🎤 Voz")
         self.voice_button.setObjectName("voice_button")
         self.voice_button.setFixedWidth(80)
+        self.voice_button.setToolTip("Iniciar grabación de voz (Ctrl+V)")
 
         # Campo de entrada
         self.text_input = QLineEdit()
@@ -178,17 +201,21 @@ class ChatPanel(QWidget):
         self.text_input.setPlaceholderText(
             "Escribe tu mensaje o presiona el botón de voz..."
         )
+        self.text_input.setClearButtonEnabled(True)
 
         # Botón de enviar
         self.send_button = QPushButton("📤 Enviar")
         self.send_button.setObjectName("send_button")
         self.send_button.setFixedWidth(80)
+        self.send_button.setToolTip("Enviar mensaje (Enter)")
+        self.send_button.setEnabled(False)
 
         # Botón de detener
         self.stop_button = QPushButton("⏹ Detener")
         self.stop_button.setObjectName("stop_button")
         self.stop_button.setFixedWidth(80)
         self.stop_button.setEnabled(False)
+        self.stop_button.setToolTip("Detener operación actual (Esc)")
 
         input_layout.addWidget(self.voice_button)
         input_layout.addWidget(self.text_input)
@@ -198,7 +225,7 @@ class ChatPanel(QWidget):
         parent_layout.addWidget(input_frame)
 
     def _setup_animations(self):
-        """Configura las animaciones"""
+        """Configura las animaciones y timers"""
         self.status_timer = QTimer()
         self.status_timer.timeout.connect(self._update_status_animation)
         self.status_animation_state = 0
@@ -207,19 +234,55 @@ class ChatPanel(QWidget):
         self.progress_timer.timeout.connect(self._update_progress_animation)
         self.progress_value = 0
 
+        self.typing_indicator_timer = QTimer()
+        self.typing_indicator_timer.timeout.connect(self._update_typing_indicator)
+
     def _connect_signals(self):
-        """Conecta las señales internas"""
+        """Conecta todas las señales internas"""
         self.voice_button.clicked.connect(self.start_voice_flow)
         self.send_button.clicked.connect(self.start_text_flow)
         self.text_input.returnPressed.connect(self.start_text_flow)
-        self.stop_button.clicked.connect(self.worker_stop_requested.emit)
+        self.text_input.textChanged.connect(self._on_text_changed)
+        self.stop_button.clicked.connect(self.stop_generation)
         self.model_selector.currentTextChanged.connect(self.model_changed.emit)
 
     def _load_available_models(self):
         """Carga los modelos disponibles desde Ollama"""
-        # Por ahora cargamos modelos por defecto
-        default_models = ["arch-chan", "arch-chan-lite", "llama3.2:3b", "gemma:2b"]
-        self.model_selector.addItems(default_models)
+        try:
+            # Limpiar selector primero
+            self.model_selector.clear()
+
+            # Intentar cargar modelos de Ollama si está disponible
+            if hasattr(self, "ollama_client") and self.ollama_client:
+                models = self.ollama_client.list_models()
+                if models:
+                    model_names = []
+                    for model in models:
+                        name = model.get("name", "")
+                        if name:
+                            model_names.append(name)
+
+                    if model_names:
+                        self.model_selector.addItems(model_names)
+                        self.logger.info(
+                            f"Modelos cargados desde Ollama: {len(model_names)}"
+                        )
+                        return
+
+            # Fallback a modelos por defecto
+            default_models = [
+                "arch-chan-lite",
+                "arch-chan",
+                "llama3.2:3b",
+                "gemma:2b",
+            ]
+            self.model_selector.addItems(default_models)
+            self.logger.info("Usando modelos por defecto")
+
+        except Exception as e:
+            self.logger.error(f"Error cargando modelos: {e}")
+            # Fallback mínimo
+            self.model_selector.addItems(["arch-chan"])
 
     def _show_welcome_message(self):
         """Muestra el mensaje de bienvenida"""
@@ -242,7 +305,10 @@ class ChatPanel(QWidget):
             <div style='color: {theme['text_muted']}; font-size: 11px; 
                        background: {theme['background']}; padding: 10px; 
                        border-radius: 6px; border: 1px solid {theme['border']};'>
-                💡 <b>Consejo:</b> Presiona el botón de voz o escribe un mensaje para comenzar
+                💡 <b>Consejos rápidos:</b><br>
+                • Presiona <b>Ctrl+V</b> para activar el modo voz<br>
+                • Presiona <b>Enter</b> para enviar mensajes<br>
+                • Usa <b>Esc</b> para cancelar operaciones
             </div>
         </div>
         """
@@ -311,7 +377,7 @@ class ChatPanel(QWidget):
 
         # Mantener el cursor al final
         cursor = self.chat_area.textCursor()
-        cursor.movePosition(QTextCursor.MoveOperation.End)
+        cursor.movePosition(QTextCursor.End)
         self.chat_area.setTextCursor(cursor)
 
         self.chat_area.append(html)
@@ -320,6 +386,9 @@ class ChatPanel(QWidget):
         scrollbar = self.chat_area.verticalScrollBar()
         scrollbar.setValue(scrollbar.maximum())
 
+    def set_ollama_client(self, ollama_client):
+        self.ollama_client = ollama_client
+
     def start_voice_flow(self):
         """Inicia el flujo de voz"""
         if self.processing:
@@ -327,7 +396,9 @@ class ChatPanel(QWidget):
 
         self.voice_flow_started.emit()
         self._set_processing_state(True)
+        self.voice_recording = True
         self.voice_button.setText("🔴 Grabando...")
+        self.voice_button.setProperty("class", "recording")
         self.status_label.setText("🎤 Grabando audio... Habla ahora")
         self.voice_indicator.setText("🎤 Grabando...")
         self._start_status_animation()
@@ -341,26 +412,59 @@ class ChatPanel(QWidget):
         if not user_prompt:
             return
 
+        current_model = self.model_selector.currentText()
+        self.logger.info(f"Iniciando flujo de texto con modelo: {current_model}")
         self.text_flow_started.emit(user_prompt)
         self._set_processing_state(True)
         self.text_input.clear()
         self.add_chat_message("Usuario", user_prompt)
         self._start_status_animation()
 
+    def _on_text_changed(self, text):
+        """Maneja cambios en el texto de entrada"""
+        # Habilitar/deshabilitar botón de enviar
+        self.send_button.setEnabled(bool(text.strip()))
+
+    def stop_generation(self):
+        """Detiene la generación actual - MÉTODO NUEVO"""
+        try:
+            self.logger.info("Solicitando detención de generación...")
+            self.worker_stop_requested.emit()
+            self._set_processing_state(False)
+            self.status_label.setText("🟢 Generación detenida")
+
+            # Mostrar mensaje en el chat
+            self.add_chat_message(
+                "Sistema", "Generación detenida por el usuario", is_tool=True
+            )
+
+        except Exception as e:
+            self.logger.error(f"Error deteniendo generación: {e}")
+
     def _set_processing_state(self, processing=True):
         """Establece el estado de procesamiento"""
         self.processing = processing
         self.voice_button.setEnabled(not processing)
-        self.send_button.setEnabled(not processing)
+        self.send_button.setEnabled(
+            not processing and bool(self.text_input.text().strip())
+        )
         self.text_input.setEnabled(not processing)
         self.model_selector.setEnabled(not processing)
-        self.stop_button.setEnabled(processing)
+        self.stop_button.setEnabled(
+            processing
+        )  # Solo habilitado cuando está procesando
 
         self.progress_bar.setVisible(processing)
         if processing:
             self._start_progress_animation()
+            self.status_label.setText("🤖 Procesando...")
         else:
             self._stop_progress_animation()
+            self.voice_recording = False
+            self.voice_button.setText("🎤 Voz")
+            self.voice_button.setProperty("class", "")
+            self.voice_indicator.setText("🎤 Voz: Activa")
+            self.status_label.setText("🟢 Sistema listo")
 
     def _start_status_animation(self):
         """Inicia la animación de estado"""
@@ -396,12 +500,18 @@ class ChatPanel(QWidget):
         self.progress_timer.stop()
         self.progress_bar.setValue(0)
 
+    def _update_typing_indicator(self):
+        """Actualiza el indicador de escritura"""
+        if self.typing_indicator_active:
+            current_text = self.status_label.text()
+            if "escribiendo" in current_text.lower():
+                dots = (current_text.count(".") + 1) % 4
+                self.status_label.setText(f"🤖 Arch-Chan está escribiendo{'.' * dots}")
+
     def on_worker_finished(self):
         """Maneja la finalización del worker"""
         self._set_processing_state(False)
-        self.voice_button.setText("🎤 Voz")
         self.status_label.setText("🟢 Sistema listo")
-        self.voice_indicator.setText("🎤 Voz: Activa")
         self._stop_status_animation()
 
     def _stop_status_animation(self):
@@ -414,9 +524,32 @@ class ChatPanel(QWidget):
         if connected:
             self.connection_indicator.setText("🌐 Conectado")
             self.status_label.setText("🟢 Sistema listo - Conectado a Ollama")
+            self.connection_indicator.setStyleSheet(
+                "color: #33D17A; font-weight: bold;"
+            )
         else:
             self.connection_indicator.setText("🔴 Desconectado")
             self.status_label.setText("🔴 Sistema desconectado")
+            self.connection_indicator.setStyleSheet(
+                "color: #F04A50; font-weight: bold;"
+            )
+
+    def verify_ollama_connection(self):
+        """Verifica la conexión con Ollama y actualiza la UI"""
+        try:
+            if hasattr(self, "ollama_client") and self.ollama_client:
+                is_healthy = self.ollama_client.check_health()
+                self.update_connection_status(is_healthy)
+
+                if is_healthy:
+                    # Recargar modelos si está conectado
+                    self._load_available_models()
+                return is_healthy
+            return False
+        except Exception as e:
+            self.logger.error(f"Error verificando conexión Ollama: {e}")
+            self.update_connection_status(False)
+            return False
 
     def clear_chat(self):
         """Limpia el historial del chat"""
@@ -430,9 +563,53 @@ class ChatPanel(QWidget):
         self.current_theme = self.config_manager.get("UI", "theme", "arch-dark")
         self._apply_component_styles()
 
+    def on_theme_changed(self, theme_name):
+        """Maneja cambios de tema"""
+        self.current_theme = theme_name
+        self._apply_component_styles()
+
+    def on_model_changed(self, model_name):
+        """Maneja cambios de modelo"""
+        self.model_selector.setCurrentText(model_name)
+
     def _apply_component_styles(self):
         """Aplica estilos específicos a los componentes"""
-        theme = ArchLinuxTheme.get_theme(self.current_theme)
-
-        # Aplicar estilos específicos si es necesario
+        # Los estilos principales se aplican via QSS
+        # Este método puede usarse para ajustes específicos
         pass
+
+    def set_voice_recording_state(self, recording=True):
+        """Establece el estado de grabación de voz"""
+        self.voice_recording = recording
+        if recording:
+            self.voice_button.setProperty("class", "recording")
+        else:
+            self.voice_button.setProperty("class", "")
+        self.voice_button.style().unpolish(self.voice_button)
+        self.voice_button.style().polish(self.voice_button)
+
+    def set_connection_state(self, connected=True):
+        """Establece el estado de conexión con estilo"""
+        self.connection_indicator.setProperty(
+            "connected", "true" if connected else "false"
+        )
+        self.connection_indicator.style().unpolish(self.connection_indicator)
+        self.connection_indicator.style().polish(self.connection_indicator)
+        self.update_connection_status(connected)
+
+    def set_processing_state(self, processing=True):
+        """Establece el estado de procesamiento con estilo"""
+        self.status_label.setProperty("processing", "true" if processing else "false")
+        self.status_label.style().unpolish(self.status_label)
+        self.status_label.style().polish(self.status_label)
+        self._set_processing_state(processing)
+
+    def show_typing_indicator(self, show=True):
+        """Muestra u oculta el indicador de escritura"""
+        self.typing_indicator_active = show
+        if show:
+            self.typing_indicator_timer.start(500)
+            self.status_label.setText("🤖 Arch-Chan está escribiendo")
+        else:
+            self.typing_indicator_timer.stop()
+            self.status_label.setText("🟢 Sistema listo")
